@@ -230,17 +230,29 @@ public class ClanCommand implements CommandExecutor {
                         player.sendMessage(ChatColor.GOLD + "=====[ Команды клана ]=====");
                         player.sendMessage(ChatColor.YELLOW + "/clan info" + ChatColor.WHITE + " - Информация о твоем клане");
                         player.sendMessage(ChatColor.YELLOW + "/clan leave" + ChatColor.WHITE + " - Покинуть клан");
-                        player.sendMessage(ChatColor.YELLOW + "/clan setleader <игрок>" + ChatColor.WHITE + " - Назначить лидера клана");
-                        player.sendMessage(ChatColor.YELLOW + "/clan chat" + ChatColor.WHITE + " - Включить/выключить видимость клан-чата");
-                        player.sendMessage(ChatColor.YELLOW + "/chatcl <сообщение>" + ChatColor.WHITE + " - Отправить сообщение в клан-чат");
                         player.sendMessage(ChatColor.YELLOW + "/clan help" + ChatColor.WHITE + " - Показать это сообщение");
                         player.sendMessage(ChatColor.YELLOW + "/clan join" + ChatColor.WHITE + " - Выбрать и вступить в клан");
-                        player.sendMessage(ChatColor.YELLOW + "/clan createbase" + ChatColor.WHITE + " - Создать клановую базу (только лидер)");
+
+                        player.sendMessage(ChatColor.GOLD + "=====[ Чат клана ]=====");
                         player.sendMessage(ChatColor.YELLOW + "/clanchat toggle" + ChatColor.WHITE + " - Включить/выключить режим отправки сообщений в клан-чат");
-                        player.sendMessage(ChatColor.YELLOW + "/clan deletebase" + ChatColor.WHITE + " - Удалить базу клана (только лидер)");
+                        player.sendMessage(ChatColor.YELLOW + "/clan chat" + ChatColor.WHITE + " - Включить/выключить видимость клан-чата");
+                        player.sendMessage(ChatColor.YELLOW + "/chatcl <сообщение>" + ChatColor.WHITE + " - Отправить сообщение в клан-чат");
+
+                        player.sendMessage(ChatColor.GOLD + "=====[ Команды лидера ]=====");
+                        player.sendMessage(ChatColor.YELLOW + "/clan createbase" + ChatColor.WHITE + " - Создать клановую базу");
+                        player.sendMessage(ChatColor.YELLOW + "/clan deletebase" + ChatColor.WHITE + " - Удалить базу клана");
+                        player.sendMessage(ChatColor.YELLOW + "/removeplayer <игрок>" + ChatColor.WHITE + " - Удалить участника из клана");
+
+
+                        player.sendMessage(ChatColor.GOLD + "=====[ Команды админа (потом сделаю отображение только админам) ]=====");
+                        player.sendMessage(ChatColor.YELLOW + "/clan removeleader <клан>" + ChatColor.WHITE + " - Удалить лидера у клана");
+                        player.sendMessage(ChatColor.YELLOW + "/clan setleader <игрок>" + ChatColor.WHITE + " - Назначить лидера клана");
+                        player.sendMessage(ChatColor.YELLOW + "/addplayer <игрок> <клан>" + ChatColor.WHITE + " - Добавить участника в клан");
+                        player.sendMessage(ChatColor.YELLOW + "/removeplayer <игрок>" + ChatColor.WHITE + " - Удалить участника из клана");
                         player.sendMessage(ChatColor.GOLD + "============================");
                         return true;
                     }
+
 
                     default -> {
                         player.sendMessage(ChatColor.RED + "Неизвестная команда. Используй: /clan help");

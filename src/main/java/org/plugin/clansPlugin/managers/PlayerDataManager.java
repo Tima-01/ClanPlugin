@@ -123,18 +123,29 @@ public class PlayerDataManager {
         return playerData.getString("players." + playerName);
     }
 
+
     /**
      * Устанавливает (или обновляет) клан для игрока
      */
     public void setPlayerClan(String playerName, String clanName) {
         playerData.set("players." + playerName, clanName);
+        save();
     }
+    public void save() {
+        try {
+            playerData.save(playerFile);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
 
     /**
      * Удаляет игрока из клана (игрок выходит)
      */
     public void removePlayerFromClan(String playerName) {
         playerData.set("players." + playerName, null);
+        save();
     }
 
     /**

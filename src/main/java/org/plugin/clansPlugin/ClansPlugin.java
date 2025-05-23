@@ -2,12 +2,10 @@ package org.plugin.clansPlugin;
 
 
 import org.bukkit.plugin.java.JavaPlugin;
+import org.plugin.clansPlugin.commands.*;
 import org.plugin.clansPlugin.managers.ClanManager;
 import org.plugin.clansPlugin.managers.PlayerDataManager;
 import org.plugin.clansPlugin.managers.TerritoryManager;
-import org.plugin.clansPlugin.commands.ChatClCommand;
-import org.plugin.clansPlugin.commands.ClanChatCommand;
-import org.plugin.clansPlugin.commands.ClanCommand;
 import org.plugin.clansPlugin.listeners.InventoryClickListener;
 import org.plugin.clansPlugin.listeners.PlayerChatListener;
 import org.plugin.clansPlugin.listeners.PlayerJoinListener;
@@ -33,16 +31,20 @@ public class ClansPlugin extends JavaPlugin {
         territoryManager.initTerritoryFile();// инициализация territories.yml
 
         // 3) Регистрируем слушателей
+
         getServer().getPluginManager().registerEvents(new PlayerJoinListener(this), this);
         getServer().getPluginManager().registerEvents(new InventoryClickListener(this), this);
         getServer().getPluginManager().registerEvents(new PlayerChatListener(this), this);
         getServer().getPluginManager().registerEvents(new PlayerMoveListener(this), this);
 
         // 4) Регистрируем команды
+        getCommand("showbase").setExecutor(new ShowBaseCommand(territoryManager, playerDataManager));
         getCommand("chatcl").setExecutor(new ChatClCommand(this));
         getCommand("clanchat").setExecutor(new ClanChatCommand(this));
         getCommand("clan").setExecutor(new ClanCommand(this));
-
+        getCommand("addplayer").setExecutor(new AddPlayerCommand(playerDataManager));
+        getCommand("removeplayer").setExecutor(new RemovePlayerCommand(playerDataManager));
+        getCommand("clan").setExecutor(new RemoveLeaderCommand(playerDataManager));
         getLogger().info("ClansPlugin включен.");
 
         // 5) Регистрация плейсхолдеров

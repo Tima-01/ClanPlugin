@@ -1,6 +1,8 @@
 package org.plugin.clansPlugin.managers;
 
-
+import org.bukkit.Bukkit;
+import org.bukkit.Location;
+import org.bukkit.World;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -66,6 +68,12 @@ public class TerritoryManager {
         territoryData.set("territories." + clanName, null);
         saveTerritoryData();
     }
+    /**
+     *
+     */
+    public YamlConfiguration getTerritoryData() {
+        return territoryData;
+    }
 
     /**
      * По координатам чанка (chunkX, chunkZ) найти, на территории какого клана сейчас находится игрок.
@@ -106,12 +114,72 @@ public class TerritoryManager {
                 String[] parts = coord.split(",");
                 int ox = Integer.parseInt(parts[0]);
                 int oz = Integer.parseInt(parts[1]);
-                // если новая базa в радиусе 6 чанков от уже существующей
+                // если новая база в радиусе 6 чанков от уже существующей
                 if (Math.abs(ox - centerChunkX) < 6 && Math.abs(oz - centerChunkZ) < 6) {
                     return true;
                 }
             }
         }
         return false;
+    }
+
+    /**
+     * Возвращает центр базы клана в виде Location.
+     * Если у клана нет сохранённых чанков, возвращает null.
+     *
+     * Логика:
+     * 1) Считываем список строк "chunkX,chunkZ" для данного clanName.
+     * 2) Находим минимальные и максимальные значения chunkX и chunkZ среди всех чанков базы.
+     * 3) Рассчитываем центральный чанк: (minX + maxX) / 2, (minZ + maxZ) / 2.
+     * 4) Переводим координаты "центр чанка" в координаты блока: centerChunkX * 16 + 8, centerChunkZ * 16 + 8.
+     * 5) Определяем высоту Y, используя самый высокий блок на этой X,Z через world.getHighestBlockYAt().
+     * 6) Берём первый доступный мир сервера (если у вас лишь один мир — этого достаточно).
+     */
+    public Location getClanBaseCenter(String clanName) {
+        // Если у клана нет раздела в yml, возвращаем null
+        if (!territoryData.contains("territories." + clanName)) {
+            return null;
+        }
+
+        List<String> chunks = territoryData.getStringList("territories." + clanName);
+        if (chunks.isEmpty()) {
+            return null;
+        }
+
+        int minChunkX = Integer.MAX_VALUE;
+        int maxChunkX = Integer.MIN_VALUE;
+        int minChunkZ = Integer.MAX_VALUE;
+        int maxChunkZ = Integer.MIN_VALUE;
+
+        // Проходим по всем записям вида "chunkX,chunkZ"
+        for (String coord : chunks) {
+            String[] parts = coord.split(",");
+            int cX = Integer.parseInt(parts[0].trim());
+            int cZ = Integer.parseInt(parts[1].trim());
+
+            if (cX < minChunkX) minChunkX = cX;
+            if (cX > maxChunkX) maxChunkX = cX;
+            if (cZ < minChunkZ) minChunkZ = cZ;
+            if (cZ > maxChunkZ) maxChunkZ = cZ;
+        }
+
+        // Находим центральный чанк
+        int centerChunkX = (minChunkX + maxChunkX) / 2;
+        int centerChunkZ = (minChunkZ + maxChunkZ) / 2;
+
+        // Переводим в блочные координаты: центр чанка = chunk * 16 + 8
+        int blockX = centerChunkX * 16 + 8;
+        int blockZ = centerChunkZ * 16 + 8;
+
+        // Берём первый мир из списка (если у вас один мир, он и так будет первым)
+        World world = Bukkit.getServer().getWorlds().get(0);
+        if (world == null) {
+            return null; // на всякий случай
+        }
+
+        // Y определяем как самый высокий непустой блок в этих X,Z
+        int blockY = world.getHighestBlockYAt(blockX, blockZ);
+
+        return new Location(world, blockX, blockY, blockZ);
     }
 }

@@ -7,13 +7,25 @@ api-version: '1.20'
 commands:
   clan:
     description: Основная команда управления кланами
-    usage: /<command> <info|join|leave|chat|help|createbase|deletebase|setleader>
+    usage: /<command> <info|join|leave|chat|help|createbase|deletebase|setleader|removeleader>
   chatcl:
     description: Отправить сообщение в клан-чат
     usage: /<command> <сообщение>
   clanchat:
     description: Переключить режим отправки сообщений в клан-чат
     usage: /<command> toggle
+  showbase:
+    description: Показывает границы территории базы клана
+    usage: /<command>
+  addplayer:
+    description: Добавить игрока в клан
+    usage: /<command> <игрок> <клан>
+    permission: clan.admin
+  removeplayer:
+    description: Удалить игрока из клана
+    usage: /<command> <ник>
+    permission: clan.admin
+    permission-message: У вас нет прав для этой команды.
 
 permissions:
   clan.admin:
