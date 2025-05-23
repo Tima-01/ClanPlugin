@@ -12,6 +12,7 @@ import org.plugin.clansPlugin.listeners.InventoryClickListener;
 import org.plugin.clansPlugin.listeners.PlayerChatListener;
 import org.plugin.clansPlugin.listeners.PlayerJoinListener;
 import org.plugin.clansPlugin.listeners.PlayerMoveListener;
+import org.plugin.clansPlugin.placeholders.ClanExpansion;
 
 public class ClansPlugin extends JavaPlugin {
 
@@ -43,6 +44,9 @@ public class ClansPlugin extends JavaPlugin {
         getCommand("clan").setExecutor(new ClanCommand(this));
 
         getLogger().info("ClansPlugin включен.");
+
+        // 5) Регистрация плейсхолдеров
+        new ClanExpansion(this).register();
     }
 
     @Override
