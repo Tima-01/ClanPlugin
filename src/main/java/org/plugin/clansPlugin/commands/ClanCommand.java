@@ -1,5 +1,5 @@
 package org.plugin.clansPlugin.commands;
-package org.plugin.clansplugin.commands;
+
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
