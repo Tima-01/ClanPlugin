@@ -3,17 +3,20 @@ version: '1.0-SNAPSHOT'
 main: org.plugin.clansPlugin.ClansPlugin
 api-version: '1.20'
 
+
 commands:
   clan:
-    description: Команды кланов
-    usage: /clan <info|leave|chat|help>
+    description: Основная команда управления кланами
+    usage: /<command> <info|join|leave|chat|help|createbase|deletebase|setleader>
   chatcl:
     description: Отправить сообщение в клан-чат
-    usage: /chatcl <сообщение>
+    usage: /<command> <сообщение>
   clanchat:
-    description: Включает/выключает режим клан-чата
-    usage: /clanchat toggle
-  setleader:
-    description: Назначить лидера клана
-    usage: /setleader <игрок> <клан>
-    permission: clan.admin
+    description: Переключить режим отправки сообщений в клан-чат
+    usage: /<command> toggle
+
+permissions:
+  clan.admin:
+    description: Право назначать лидера клана
+    default: op
+
