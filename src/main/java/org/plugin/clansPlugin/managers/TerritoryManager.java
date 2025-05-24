@@ -1,6 +1,7 @@
 package org.plugin.clansPlugin.managers;
 
 import org.bukkit.Bukkit;
+import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.configuration.ConfigurationSection;
@@ -9,6 +10,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
@@ -18,6 +20,7 @@ public class TerritoryManager {
     private final JavaPlugin plugin;
     private File territoryFile;
     private YamlConfiguration territoryData;
+    private final java.util.Map<String, Set<Chunk>> territories = new java.util.HashMap<>();
 
     public TerritoryManager(JavaPlugin plugin) {
         this.plugin = plugin;
@@ -35,6 +38,16 @@ public class TerritoryManager {
             }
         }
         territoryData = YamlConfiguration.loadConfiguration(territoryFile);
+    }
+    public void saveTerritories() {
+        for (String clan : territories.keySet()) {
+            List<String> chunkList = new java.util.ArrayList<>();
+            for (Chunk chunk : territories.get(clan)) {
+                chunkList.add(chunk.getX() + "," + chunk.getZ());
+            }
+            territoryData.set("territories." + clan, chunkList);
+        }
+        saveTerritoryData();
     }
 
     public void saveTerritoryData() {
@@ -122,6 +135,72 @@ public class TerritoryManager {
             }
         }
         return false;
+    }
+    public Set<Chunk> calculateTerritory(Location center, int chunkCount) {
+        Set<Chunk> result = new java.util.HashSet<>();
+        if (center == null || center.getWorld() == null) return result;
+
+        int cx = center.getChunk().getX();
+        int cz = center.getChunk().getZ();
+        World world = center.getWorld();
+
+        java.util.Queue<int[]> queue = new java.util.LinkedList<>();
+        java.util.Set<String> visited = new java.util.HashSet<>();
+
+        queue.add(new int[]{cx, cz});
+        visited.add(cx + "," + cz);
+
+        while (!queue.isEmpty() && result.size() < chunkCount) {
+            int[] coords = queue.poll();
+            int x = coords[0];
+            int z = coords[1];
+
+            Chunk chunk = world.getChunkAt(x, z);
+            result.add(chunk);
+
+            // Добавляем соседние чанки (в 4 стороны)
+            int[][] directions = {
+                    {1, 0}, {-1, 0}, {0, 1}, {0, -1}
+            };
+
+            for (int[] dir : directions) {
+                int nx = x + dir[0];
+                int nz = z + dir[1];
+                String key = nx + "," + nz;
+                if (!visited.contains(key)) {
+                    visited.add(key);
+                    queue.add(new int[]{nx, nz});
+                }
+            }
+        }
+
+        return result;
+    }
+
+    public void adjustClanTerritorySize(String clanName, int memberCount) {
+        int baseSideLength = 6; // начальная сторона квадрата
+        int membersPerExpansion = 5; // сколько участников нужно для расширения на +1
+        int sideLength = baseSideLength + (memberCount / membersPerExpansion);
+        int totalChunks = sideLength * sideLength;
+
+        Location center = getClanBaseCenter(clanName);
+        if (center == null) return;
+
+        // Генерация списка чанков для новой территории
+        List<String> newChunks = new ArrayList<>();
+        int centerChunkX = center.getBlockX() >> 4;
+        int centerChunkZ = center.getBlockZ() >> 4;
+        int radius = sideLength / 2;
+
+        for (int dx = -radius; dx <= radius; dx++) {
+            for (int dz = -radius; dz <= radius; dz++) {
+                int chunkX = centerChunkX + dx;
+                int chunkZ = centerChunkZ + dz;
+                newChunks.add(chunkX + "," + chunkZ);
+            }
+        }
+
+        setClanChunks(clanName, newChunks);
     }
 
     /**

@@ -47,6 +47,12 @@ public class InventoryClickListener implements Listener {
         pdm.setPlayerClan(player.getName(), clan);
         pdm.savePlayerData();
         player.sendMessage(ChatColor.GREEN + "Ты вступил в клан: " + clan);
+
+        // ⬇️ Вот это добавь — обновление размера территории:
+        int updatedSize = pdm.getClanMembers(clan).size();
+        plugin.getTerritoryManager().adjustClanTerritorySize(clan, updatedSize);
+
         player.closeInventory();
     }
+
 }

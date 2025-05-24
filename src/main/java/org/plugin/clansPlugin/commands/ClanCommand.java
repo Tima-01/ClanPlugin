@@ -234,10 +234,15 @@ public class ClanCommand implements CommandExecutor {
                             player.sendMessage(ChatColor.RED + "Ты был лидером. Лидерство клана снято.");
                         }
 
+                        // === СЖАТИЕ ТЕРРИТОРИИ ПОСЛЕ ВЫХОДА ===
+                        int updatedSize = pdm.getClanMembers(clanName).size();
+                        plugin.getTerritoryManager().adjustClanTerritorySize(clanName, updatedSize);
+
                         pdm.savePlayerData();
                         player.sendMessage(ChatColor.YELLOW + "Ты покинул клан.");
                         return true;
                     }
+
 
                     case "chat" -> {
                         if (!pdm.isPlayerInClan(player.getName())) {
@@ -275,6 +280,7 @@ public class ClanCommand implements CommandExecutor {
                         player.sendMessage(ChatColor.YELLOW + "/removeplayer <игрок>" + ChatColor.WHITE + " - Удалить участника из клана");
 
                         player.sendMessage(ChatColor.GOLD + "=====[ Команды админа (потом сделаю отображение только админам) ]=====");
+                        player.sendMessage(ChatColor.YELLOW + "/clan reload" + ChatColor.WHITE + " - Перезагрузка конфигов");
                         player.sendMessage(ChatColor.YELLOW + "/endtvote <клан>" + ChatColor.WHITE + " - Досрочное успешное завершение голосования");
                         player.sendMessage(ChatColor.YELLOW + "/startvote <клан>" + ChatColor.WHITE + " - Начать голосование за нового лидера");
                         player.sendMessage(ChatColor.YELLOW + "/clan removeleader <клан>" + ChatColor.WHITE + " - Удалить лидера у клана");
