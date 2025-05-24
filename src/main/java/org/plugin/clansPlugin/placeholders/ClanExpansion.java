@@ -28,7 +28,7 @@ public class ClanExpansion extends PlaceholderExpansion {
     // Кеш: ключ — игрок+идентификатор, значение — CacheEntry с результатом и временем обновления
     private final Map<String, CacheEntry> cache = new HashMap<>();
 
-    // Время кеширования в миллисекундах (15 минут)
+    // Время кеширования в миллисекундах (60 минут)
     private static final long CACHE_TIME = 60 * 60 * 1000;
 
     public ClanExpansion(ClansPlugin plugin) {
@@ -98,7 +98,6 @@ public class ClanExpansion extends PlaceholderExpansion {
             return cached.value;
         }
 
-        // Если нет в кеше или кеш устарел — обновляем
         String playerName = player.getName();
         plugin.getLogger().info("Запрос плейсхолдера '" + identifier + "' для игрока " + playerName);
 
@@ -108,8 +107,9 @@ public class ClanExpansion extends PlaceholderExpansion {
         String result;
 
         if (clanName == null) {
+            // Если клана нет — возвращаем пустую строку
             plugin.getLogger().info("Клан не найден у игрока " + playerName);
-            result = "Пока нет";
+            result = "";
         } else {
             switch (identifier.toLowerCase()) {
                 case "tag":
@@ -136,7 +136,7 @@ public class ClanExpansion extends PlaceholderExpansion {
                         if (base != null) {
                             result = String.format("X: %d, Y: %d, Z: %d", base.getBlockX(), base.getBlockY(), base.getBlockZ());
                         } else {
-                            result = "Пока нет";
+                            result = "Базы нет.";
                         }
                     } else {
                         result = "Ошибка плагина";
@@ -147,7 +147,6 @@ public class ClanExpansion extends PlaceholderExpansion {
             }
         }
 
-        // Запоминаем в кеш
         if (result != null) {
             cache.put(key, new CacheEntry(result, now));
         }
