@@ -25,7 +25,7 @@ public class ClanExpansion extends PlaceholderExpansion {
     private final Map<String, CacheEntry> cache = new HashMap<>();
 
     // Время кеширования в миллисекундах (60 минут)
-    private static final long CACHE_TIME = 60 * 60 * 1000;
+    private static final long CACHE_TIME = 1 * 60 * 1000;
 
     public ClanExpansion(ClansPlugin plugin) {
         this.plugin = plugin;
