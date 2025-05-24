@@ -3,7 +3,6 @@ version: '1.0-SNAPSHOT'
 main: org.plugin.clansPlugin.ClansPlugin
 api-version: '1.20'
 
-
 commands:
   clan:
     description: Основная команда управления кланами
@@ -21,14 +20,28 @@ commands:
     description: Добавить игрока в клан
     usage: /<command> <игрок> <клан>
     permission: clan.admin
+    permission-message: У вас нет прав для этой команды.
   removeplayer:
     description: Удалить игрока из клана
     usage: /<command> <ник>
     permission: clan.admin
     permission-message: У вас нет прав для этой команды.
+  votel:
+    description: Проголосовать за участника клана
+    usage: /<command> <ник>
+  # опционально, если startvote отдельная команда
+  startvote:
+    description: Начать голосование за нового лидера клана (только для админа)
+    usage: /<command> <клан>
+    permission: clan.admin
+    permission-message: У вас нет прав для этой команды.
 
+  endvote:
+    description: Досрочно завершить голосование за лидера клана
+    usage: /endvote <клан>
+    permission: clan.admin
+    permission-message: У вас нет прав для этой команды.
 permissions:
   clan.admin:
-    description: Право назначать лидера клана
+    description: Право выполнять админские команды клана
     default: op
-

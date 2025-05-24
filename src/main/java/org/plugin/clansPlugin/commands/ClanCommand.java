@@ -12,6 +12,7 @@ import org.plugin.clansPlugin.ClansPlugin;
 import org.plugin.clansPlugin.managers.ClanManager;
 import org.plugin.clansPlugin.managers.PlayerDataManager;
 import org.plugin.clansPlugin.managers.TerritoryManager;
+import org.plugin.clansPlugin.managers.VoteManager;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,12 +23,15 @@ public class ClanCommand implements CommandExecutor {
     private final ClanManager clanManager;
     private final PlayerDataManager pdm;
     private final TerritoryManager territoryManager;
+    private final VoteManager voteManager;
 
     public ClanCommand(ClansPlugin plugin) {
         this.plugin = plugin;
         this.clanManager = plugin.getClanManager();
         this.pdm = plugin.getPlayerDataManager();
         this.territoryManager = plugin.getTerritoryManager();
+        this.voteManager = plugin.getVoteManager();
+
     }
 
     @Override
@@ -156,6 +160,7 @@ public class ClanCommand implements CommandExecutor {
                         return true;
                     }
 
+
                     case "join" -> {
                         if (pdm.isPlayerInClan(player.getName())) {
                             player.sendMessage(ChatColor.RED + "Ты уже состоишь в клане. Сначала выйди с помощью /clan leave.");
@@ -232,6 +237,7 @@ public class ClanCommand implements CommandExecutor {
                         player.sendMessage(ChatColor.YELLOW + "/clan leave" + ChatColor.WHITE + " - Покинуть клан");
                         player.sendMessage(ChatColor.YELLOW + "/clan help" + ChatColor.WHITE + " - Показать это сообщение");
                         player.sendMessage(ChatColor.YELLOW + "/clan join" + ChatColor.WHITE + " - Выбрать и вступить в клан");
+                        player.sendMessage(ChatColor.YELLOW + "/votel <игрок>" + ChatColor.WHITE + " - Проголосовать за участника клана");
 
                         player.sendMessage(ChatColor.GOLD + "=====[ Чат клана ]=====");
                         player.sendMessage(ChatColor.YELLOW + "/clanchat toggle" + ChatColor.WHITE + " - Включить/выключить режим отправки сообщений в клан-чат");
@@ -243,8 +249,9 @@ public class ClanCommand implements CommandExecutor {
                         player.sendMessage(ChatColor.YELLOW + "/clan deletebase" + ChatColor.WHITE + " - Удалить базу клана");
                         player.sendMessage(ChatColor.YELLOW + "/removeplayer <игрок>" + ChatColor.WHITE + " - Удалить участника из клана");
 
-
                         player.sendMessage(ChatColor.GOLD + "=====[ Команды админа (потом сделаю отображение только админам) ]=====");
+                        player.sendMessage(ChatColor.YELLOW + "/endtvote <клан>" + ChatColor.WHITE + " - Досрочное успешное завершение голосования");
+                        player.sendMessage(ChatColor.YELLOW + "/startvote <клан>" + ChatColor.WHITE + " - Начать голосование за нового лидера");
                         player.sendMessage(ChatColor.YELLOW + "/clan removeleader <клан>" + ChatColor.WHITE + " - Удалить лидера у клана");
                         player.sendMessage(ChatColor.YELLOW + "/clan setleader <игрок>" + ChatColor.WHITE + " - Назначить лидера клана");
                         player.sendMessage(ChatColor.YELLOW + "/addplayer <игрок> <клан>" + ChatColor.WHITE + " - Добавить участника в клан");
