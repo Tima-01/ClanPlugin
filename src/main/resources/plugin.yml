@@ -35,12 +35,16 @@ commands:
     usage: /<command> <клан>
     permission: clan.admin
     permission-message: У вас нет прав для этой команды.
-
   endvote:
     description: Досрочно завершить голосование за лидера клана
     usage: /endvote <клан>
     permission: clan.admin
     permission-message: У вас нет прав для этой команды.
+  clanadmin:
+    description: Административные команды для кланов
+    usage: /clanadmin <subcommand>
+    permission: clans.admin
+
 permissions:
   clan.admin:
     description: Право выполнять админские команды клана

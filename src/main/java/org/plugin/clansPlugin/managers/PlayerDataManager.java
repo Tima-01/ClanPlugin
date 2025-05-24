@@ -86,7 +86,9 @@ public class PlayerDataManager {
         } else {
             clanChatToggles.remove(playerName);
         }
+        savePlayerData(); // <- сохраняем после изменения
     }
+
 
     // ============================
     // Методы для работы с clanChatSendMode
@@ -110,7 +112,9 @@ public class PlayerDataManager {
         } else {
             clanChatSendMode.remove(playerName);
         }
+        savePlayerData(); // <- сохраняем после изменения
     }
+
 
     // ============================
     // Остальные методы, связанные с игроками и кланами

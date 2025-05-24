@@ -40,7 +40,7 @@ public class ClansPlugin extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new PlayerMoveListener(this), this);
 
         // 4) Регистрируем команды
-
+        this.getCommand("clanadmin").setExecutor(new ClanAdminCommand(playerDataManager, territoryManager, clanManager));
         getCommand("endvote").setExecutor(new EndVoteCommand(voteManager));
         getCommand("showbase").setExecutor(new ShowBaseCommand(territoryManager, playerDataManager));
         getCommand("chatcl").setExecutor(new ChatClCommand(this));
@@ -77,6 +77,7 @@ public class ClansPlugin extends JavaPlugin {
     public VoteManager getVoteManager() {
         return voteManager;
     }
+
     public PlayerDataManager getPlayerDataManager() {
         return playerDataManager;
     }

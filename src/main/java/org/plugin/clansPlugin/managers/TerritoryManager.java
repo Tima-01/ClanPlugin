@@ -11,6 +11,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 public class TerritoryManager {
 
@@ -136,7 +137,6 @@ public class TerritoryManager {
      * 6) Берём первый доступный мир сервера (если у вас лишь один мир — этого достаточно).
      */
     public Location getClanBaseCenter(String clanName) {
-        // Если у клана нет раздела в yml, возвращаем null
         if (!territoryData.contains("territories." + clanName)) {
             return null;
         }
@@ -151,7 +151,6 @@ public class TerritoryManager {
         int minChunkZ = Integer.MAX_VALUE;
         int maxChunkZ = Integer.MIN_VALUE;
 
-        // Проходим по всем записям вида "chunkX,chunkZ"
         for (String coord : chunks) {
             String[] parts = coord.split(",");
             int cX = Integer.parseInt(parts[0].trim());
@@ -163,23 +162,39 @@ public class TerritoryManager {
             if (cZ > maxChunkZ) maxChunkZ = cZ;
         }
 
-        // Находим центральный чанк
         int centerChunkX = (minChunkX + maxChunkX) / 2;
         int centerChunkZ = (minChunkZ + maxChunkZ) / 2;
 
-        // Переводим в блочные координаты: центр чанка = chunk * 16 + 8
         int blockX = centerChunkX * 16 + 8;
         int blockZ = centerChunkZ * 16 + 8;
 
-        // Берём первый мир из списка (если у вас один мир, он и так будет первым)
         World world = Bukkit.getServer().getWorlds().get(0);
         if (world == null) {
-            return null; // на всякий случай
+            return null;
         }
 
-        // Y определяем как самый высокий непустой блок в этих X,Z
         int blockY = world.getHighestBlockYAt(blockX, blockZ);
 
         return new Location(world, blockX, blockY, blockZ);
+    }
+
+    // --- Новые методы ниже ---
+
+    /**
+     * Возвращает множество кланов, у которых есть базы (территории).
+     */
+    public Set<String> getAllClanBases() {
+        if (!territoryData.contains("territories")) {
+            return Collections.emptySet();
+        }
+        return territoryData.getConfigurationSection("territories").getKeys(false);
+    }
+
+    /**
+     * Возвращает локацию базы клана (центр базы), или null, если база не найдена.
+     * В данном случае просто делегируем вызов getClanBaseCenter.
+     */
+    public Location getBaseLocation(String clanName) {
+        return getClanBaseCenter(clanName);
     }
 }

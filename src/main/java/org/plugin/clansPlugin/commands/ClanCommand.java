@@ -208,7 +208,18 @@ public class ClanCommand implements CommandExecutor {
                             player.sendMessage(ChatColor.RED + "Ты не состоишь в клане.");
                             return true;
                         }
+
+                        String clanName = pdm.getPlayerClan(player.getName());
+                        String currentLeader = pdm.getClanLeader(clanName);
+
                         pdm.removePlayerFromClan(player.getName());
+
+                        // Если этот игрок был лидером — удалить лидерство
+                        if (player.getName().equalsIgnoreCase(currentLeader)) {
+                            pdm.setClanLeader(clanName, null);
+                            player.sendMessage(ChatColor.RED + "Ты был лидером. Лидерство клана снято.");
+                        }
+
                         pdm.savePlayerData();
                         player.sendMessage(ChatColor.YELLOW + "Ты покинул клан.");
                         return true;
