@@ -10,11 +10,7 @@ import org.jetbrains.annotations.NotNull;
 import org.plugin.clansPlugin.ClansPlugin;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class ClanExpansion extends PlaceholderExpansion {
@@ -87,72 +83,63 @@ public class ClanExpansion extends PlaceholderExpansion {
     public String onPlaceholderRequest(Player player, @NotNull String identifier) {
         if (player == null) return null;
 
-        String key = player.getName().toLowerCase() + ":" + identifier.toLowerCase();
+        String[] parts = identifier.split(":", 2); // <= ограничиваем split до 2 частей!
+        String baseIdentifier = parts[0].toLowerCase();
+        String targetClan = parts.length > 1 ? parts[1] : null;
 
-        // Проверяем кеш
-        CacheEntry cached = cache.get(key);
+        // Получаем имя клана: если указано явно — используем его, иначе берём у игрока
+        String clanName;
+        if (targetClan != null) {
+            clanName = targetClan;
+        } else {
+            clanName = getPlayerClan(player.getName());
+            plugin.getLogger().info("[ClansPlugin] getPlayerClan: игрок " + player.getName() + ", клан: " + clanName);
+        }
+
+        plugin.getLogger().info("[ClansPlugin] Клан " + (targetClan != null ? "(указан явно): " : "игрока ") + clanName);
+
+        if (clanName == null || clanName.isEmpty()) {
+            plugin.getLogger().info("[ClansPlugin] Клан не найден" + (targetClan != null ? " (не существует?)" : " у игрока " + player.getName()));
+            return "";
+        }
+
+        String key = (targetClan != null ? "@" + clanName.toLowerCase() : player.getName().toLowerCase()) + ":" + baseIdentifier;
         long now = System.currentTimeMillis();
 
+        CacheEntry cached = cache.get(key);
         if (cached != null && (now - cached.timestamp) < CACHE_TIME) {
-            // Возвращаем кешированное значение
             return cached.value;
         }
 
-        String playerName = player.getName();
-        plugin.getLogger().info("Запрос плейсхолдера '" + identifier + "' для игрока " + playerName);
-
-        String clanName = getPlayerClan(playerName);
-        plugin.getLogger().info("Клан игрока " + playerName + ": " + clanName);
-
         String result;
-
-        if (clanName == null) {
-            // Если клана нет — возвращаем пустую строку
-            plugin.getLogger().info("Клан не найден у игрока " + playerName);
-            result = "";
-        } else {
-            switch (identifier.toLowerCase()) {
-                case "tag":
-                    result = " [" + clanName + "]";
-                    break;
-                case "leader":
-                    String leaderName = getClanLeader(clanName);
-                    plugin.getLogger().info("Лидер клана " + clanName + ": " + leaderName);
-                    result = leaderName != null ? leaderName : "Нет лидера";
-                    break;
-                case "members":
-                    List<String> members = getClanMembers(clanName);
-                    plugin.getLogger().info("Количество участников в клане " + clanName + ": " + (members != null ? members.size() : 0));
-                    result = members != null ? String.valueOf(members.size()) : "0";
-                    break;
-                case "territory":
-                    List<String> chunks = getClanTerritory(clanName);
-                    plugin.getLogger().info("Количество чанков территории клана " + clanName + ": " + (chunks != null ? chunks.size() : 0));
-                    result = chunks != null ? String.valueOf(chunks.size()) : "0";
-                    break;
-                case "base":
-                    if (plugin instanceof ClansPlugin) {
-                        Location base = ((ClansPlugin) plugin).getTerritoryManager().getClanBaseCenter(clanName);
-                        if (base != null) {
-                            result = String.format("X: %d, Y: %d, Z: %d", base.getBlockX(), base.getBlockY(), base.getBlockZ());
-                        } else {
-                            result = "Базы нет.";
-                        }
-                    } else {
-                        result = "Ошибка плагина";
-                    }
-                    break;
-                default:
-                    result = null;
-            }
+        switch (baseIdentifier) {
+            case "tag":
+                result = " [" + clanName + "]";
+                break;
+            case "leader":
+                result = Optional.ofNullable(getClanLeader(clanName)).orElse("Нет лидера");
+                break;
+            case "members":
+                result = Optional.ofNullable(getClanMembers(clanName)).map(m -> String.valueOf(m.size())).orElse("0");
+                break;
+            case "territory":
+                result = Optional.ofNullable(getClanTerritory(clanName)).map(t -> String.valueOf(t.size())).orElse("0");
+                break;
+            case "base":
+                Location base = plugin.getTerritoryManager().getClanBaseCenter(clanName);
+                result = base != null
+                        ? String.format("X: %d, Y: %d, Z: %d", base.getBlockX(), base.getBlockY(), base.getBlockZ())
+                        : "Пока нет";
+                break;
+            default:
+                result = null;
         }
-
         if (result != null) {
             cache.put(key, new CacheEntry(result, now));
         }
-
         return result;
     }
+
 
     private String getPlayerClan(String playerName) {
         if (playerConfig == null) {
