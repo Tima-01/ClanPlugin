@@ -78,34 +78,32 @@ public class ClanExpansion extends PlaceholderExpansion {
     public String onPlaceholderRequest(Player player, @NotNull String identifier) {
         if (player == null) return null;
 
-        // Обработка параметров в плейсхолдерах, например clan_leader:Бугу
+        // Перезагружаем конфиги каждый раз
+        reloadConfigs();
+
+        // Обработка параметров в плейсхолдерах
         String[] parts = identifier.split(":", 2);
         String key = parts[0].toLowerCase();
         String clanParam = parts.length > 1 ? parts[1] : null;
 
         switch (key) {
             case "tag": {
-                // %clan_tag% — без параметров, для текущего игрока
                 String clanName = plugin.getPlayerDataManager().getPlayerClan(player.getName());
                 return clanName != null ? " [" + clanName + "]" : "";
             }
             case "leader": {
-                // %clan_leader:ClanName%
                 if (clanParam == null) return "Не указан клан";
                 return getClanLeader(clanParam);
             }
             case "members": {
-                // %clan_members:ClanName%
                 if (clanParam == null) return "Не указан клан";
                 return String.valueOf(getClanMembers(clanParam).size());
             }
             case "territory": {
-                // %clan_territory:ClanName%
                 if (clanParam == null) return "Не указан клан";
                 return String.valueOf(getClanTerritory(clanParam).size());
             }
             case "base": {
-                // %clan_base:ClanName%
                 if (clanParam == null) return "Не указан клан";
                 Location base = plugin.getTerritoryManager().getClanBaseCenter(clanParam);
                 return base != null
@@ -119,7 +117,7 @@ public class ClanExpansion extends PlaceholderExpansion {
 
     private String getClanLeader(String clanName) {
         if (playerConfig == null) return "Данные не загружены";
-        return playerConfig.getString("leaders." + clanName, "Пока нет");
+        return playerConfig.getString("leaders." + clanName, "Данные не загружены");
     }
 
     private List<String> getClanMembers(String clanName) {

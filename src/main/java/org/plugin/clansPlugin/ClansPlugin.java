@@ -1,5 +1,6 @@
 package org.plugin.clansPlugin;
 
+import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.plugin.clansPlugin.commands.*;
 import org.plugin.clansPlugin.managers.ClanManager;
@@ -19,6 +20,7 @@ public class ClansPlugin extends JavaPlugin {
     private PlayerDataManager playerDataManager;
     private TerritoryManager territoryManager;
     private VoteManager voteManager;
+    private ClanExpansion clanExpansion;
 
     @Override
     public void onEnable() {
@@ -59,7 +61,10 @@ public class ClansPlugin extends JavaPlugin {
         getLogger().info("ClansPlugin включен.");
 
         // 5) Регистрация плейсхолдеров
-        new ClanExpansion(this).register();
+        if (Bukkit.getPluginManager().isPluginEnabled("PlaceholderAPI")) {
+            clanExpansion = new ClanExpansion(this);
+            clanExpansion.register();
+        }
     }
 
     @Override
