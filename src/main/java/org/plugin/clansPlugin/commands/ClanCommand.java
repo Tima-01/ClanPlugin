@@ -160,6 +160,20 @@ public class ClanCommand implements CommandExecutor {
                         return true;
                     }
 
+                    case "reload" -> {
+                        if (!player.hasPermission("clan.admin")) {
+                            player.sendMessage(ChatColor.RED + "У вас нет прав для этой команды.");
+                            return true;
+                        }
+
+                        plugin.getClanManager().reloadClans();
+                        plugin.getPlayerDataManager().initPlayerFile();
+                        plugin.getTerritoryManager().initTerritoryFile();
+
+                        player.sendMessage(ChatColor.GREEN + "ClansPlugin: Все конфигурации были перезагружены.");
+                        return true;
+                    }
+
 
                     case "join" -> {
                         if (pdm.isPlayerInClan(player.getName())) {
