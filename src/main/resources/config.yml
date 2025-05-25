@@ -1,3 +1,4 @@
 bases: {}
 # В секундах
-placeholder-refresh-interval: 900
+buff:
+  cooldown_minutes: 30

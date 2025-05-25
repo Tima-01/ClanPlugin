@@ -9,6 +9,8 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.plugin.clansPlugin.ClansPlugin;
+import org.plugin.clansPlugin.buffs.ClanBuff;
+import org.plugin.clansPlugin.gui.BuffSelectionGUI;
 import org.plugin.clansPlugin.managers.ClanManager;
 import org.plugin.clansPlugin.managers.PlayerDataManager;
 import org.plugin.clansPlugin.managers.TerritoryManager;
@@ -113,6 +115,29 @@ public class ClanCommand implements CommandExecutor {
 
                 territoryManager.setClanChunks(clanName, chunks);
                 player.sendMessage(ChatColor.GREEN + "База клана успешно установлена!");
+                return true;
+            }
+            // ====== FRIENDLYFIRE ======
+            if (args.length >= 2 && args[0].equalsIgnoreCase("friendlyfire")) {
+                String action = args[1];
+                String playerName = player.getName();
+                String clan = plugin.getPlayerDataManager().getPlayerClan(playerName);
+
+                if (clan == null) {
+                    player.sendMessage("Вы не состоите в клане.");
+                    return true;
+                }
+                // Получаем лидера из players.yml
+                String leader = plugin.getPlayerDataManager().getClanLeader(clan);
+                boolean isAdmin = player.hasPermission("clans.admin");
+
+                if (!isAdmin && !playerName.equalsIgnoreCase(leader)) {
+                    player.sendMessage("Только лидер клана или админ может изменять настройки.");
+                    return true;
+                }
+
+                boolean enable = action.equalsIgnoreCase("on");
+                player.sendMessage("Огонь по своим для клана " + clan + " теперь " + (enable ? "ВКЛЮЧЕН" : "ВЫКЛЮЧЕН"));
                 return true;
             }
 
@@ -284,7 +309,26 @@ public class ClanCommand implements CommandExecutor {
                         pdm.savePlayerData();
                         return true;
                     }
+                    case "setbuff" -> {
+                        String clanName = pdm.getPlayerClan(player.getName());
 
+                        if (clanName == null) {
+                            player.sendMessage(ChatColor.RED + "Ты не состоишь в клане.");
+                            return true;
+                        }
+
+                        String leader = pdm.getClanLeader(clanName);
+                        if (!player.getName().equalsIgnoreCase(leader)) {
+                            player.sendMessage(ChatColor.RED + "Только лидер клана может назначать баффы.");
+                            return true;
+                        }
+
+                        // Открываем GUI выбора баффа
+                        BuffSelectionGUI gui = new BuffSelectionGUI(plugin.getClanBuffManager(), clanName, player);
+                        gui.open();
+
+                        return true;
+                    }
                     case "help" -> {
                         player.sendMessage(ChatColor.GOLD + "=====[ Команды клана ]=====");
                         player.sendMessage(ChatColor.YELLOW + "/clan info" + ChatColor.WHITE + " - Информация о твоем клане");

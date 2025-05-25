@@ -3,10 +3,7 @@ package org.plugin.clansPlugin;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.plugin.clansPlugin.commands.*;
-import org.plugin.clansPlugin.managers.ClanManager;
-import org.plugin.clansPlugin.managers.PlayerDataManager;
-import org.plugin.clansPlugin.managers.TerritoryManager;
-import org.plugin.clansPlugin.managers.VoteManager;
+import org.plugin.clansPlugin.managers.*;
 import org.plugin.clansPlugin.listeners.InventoryClickListener;
 import org.plugin.clansPlugin.listeners.PlayerChatListener;
 import org.plugin.clansPlugin.listeners.PlayerJoinListener;
@@ -22,6 +19,7 @@ public class ClansPlugin extends JavaPlugin {
     private TerritoryManager territoryManager;
     private VoteManager voteManager;
     private ClanExpansion clanExpansion;
+    private ClanBuffManager clanBuffManager;
 
     @Override
     public void onEnable() {
@@ -32,6 +30,8 @@ public class ClansPlugin extends JavaPlugin {
         playerDataManager = new PlayerDataManager(this);
         territoryManager = new TerritoryManager(this);
         voteManager = new VoteManager(this, playerDataManager);
+        long cooldownMinutes = getConfig().getLong("buff.cooldown_minutes", 30);
+        clanBuffManager = new ClanBuffManager(this,cooldownMinutes * 60 * 1000);
 
         // 2) Загрузка конфигураций
         clanManager.reloadClans();
@@ -97,4 +97,5 @@ public class ClansPlugin extends JavaPlugin {
     public TerritoryManager getTerritoryManager() {
         return territoryManager;
     }
+    public ClanBuffManager getClanBuffManager() { return clanBuffManager; }
 }
