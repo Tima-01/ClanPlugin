@@ -56,25 +56,25 @@ public class PlayerMoveListener implements Listener {
             playerCurrentClan.remove(player.getName());
         }
 
-        // Применение или снятие баффа
-        ClanBuffManager buffManager = plugin.getClanBuffManager();
-        ClanBuff buff = buffManager.getBuff(playerClan);
+        // Применение/снятие баффов
+        if (playerClan == null) return;
 
-        if (buff != null) {
-            boolean onOwnTerritory = clanHere != null && clanHere.equalsIgnoreCase(playerClan);
-            boolean hasBuff = player.hasPotionEffect(buff.getEffect());
+        ClanBuff buff = plugin.getClanBuffManager().getBuff(playerClan);
+        if (buff == null) return;
 
-            if (onOwnTerritory && !hasBuff) {
-                player.addPotionEffect(new PotionEffect(
-                        buff.getEffect(),
-                        PotionEffect.INFINITE_DURATION,
-                        buff.getAmplifier(),
-                        false,
-                        false
-                ));
-            } else if (!onOwnTerritory && hasBuff) {
-                player.removePotionEffect(buff.getEffect());
-            }
+        boolean onOwnTerritory = clanHere != null && clanHere.equalsIgnoreCase(playerClan);
+        // Основной эффект
+        toggleEffect(player, buff.getPrimaryEffect(), buff.getPrimaryAmplifier(), onOwnTerritory);
+        // Вторичный эффект (добавлено)
+        if (buff.getSecondaryEffect() != null) {
+            toggleEffect(player, buff.getSecondaryEffect(), buff.getSecondaryAmplifier(), onOwnTerritory);
+        }
+    }
+    private void toggleEffect(Player player, PotionEffectType type, int amplifier, boolean apply) {
+        if (apply) {
+            player.addPotionEffect(new PotionEffect(type, PotionEffect.INFINITE_DURATION, amplifier, false, false));
+        } else {
+            player.removePotionEffect(type);
         }
     }
 }

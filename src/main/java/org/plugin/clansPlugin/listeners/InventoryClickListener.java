@@ -91,7 +91,7 @@ public class InventoryClickListener implements Listener {
             }
 
             plugin.getClanBuffManager().setClanBuff(clanId, selectedBuff);
-            player.sendMessage(ChatColor.GREEN + "Выбран бафф: " + selectedBuff.getDisplayName());
+            player.sendMessage(ChatColor.GREEN + "Бафф изменён на: " + selectedBuff.getDisplayName());
             player.closeInventory();
         }
     }

@@ -346,6 +346,7 @@ public class ClanCommand implements CommandExecutor {
                         player.sendMessage(ChatColor.YELLOW + "/clan createbase" + ChatColor.WHITE + " - Создать клановую базу");
                         player.sendMessage(ChatColor.YELLOW + "/clan deletebase" + ChatColor.WHITE + " - Удалить базу клана");
                         player.sendMessage(ChatColor.YELLOW + "/removeplayer <игрок>" + ChatColor.WHITE + " - Удалить участника из клана");
+                        player.sendMessage(ChatColor.YELLOW + "/clan setbuff" + ChatColor.WHITE + " - Выбор баффа клана");
 
                         player.sendMessage(ChatColor.GOLD + "=====[ Команды админа (потом сделаю отображение только админам) ]=====");
                         player.sendMessage(ChatColor.YELLOW + "/clan reload" + ChatColor.WHITE + " - Перезагрузка конфигов");
