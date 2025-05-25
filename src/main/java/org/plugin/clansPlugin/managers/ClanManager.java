@@ -7,6 +7,7 @@ import java.io.File;
 import java.util.List;
 
 public class ClanManager {
+    private final java.util.Map<String, Boolean> friendlyFireMap = new java.util.HashMap<>();
 
     private final JavaPlugin plugin;
     private List<String> clans;
@@ -23,6 +24,32 @@ public class ClanManager {
         File clansFile = new File(plugin.getDataFolder(), "clans.yml");
         YamlConfiguration cfg = YamlConfiguration.loadConfiguration(clansFile);
         this.clans = cfg.getStringList("clans");
+
+        friendlyFireMap.clear();
+        for (String clan : clans) {
+            boolean friendlyFire = cfg.getBoolean("friendlyFire." + clan, false);
+            friendlyFireMap.put(clan, friendlyFire);
+        }
+    }
+    public boolean isFriendlyFire(String clanName) {
+        return friendlyFireMap.getOrDefault(clanName, false);
+    }
+
+    public void setFriendlyFire(String clanName, boolean enabled) {
+        friendlyFireMap.put(clanName, enabled);
+        saveFriendlyFire(clanName, enabled);
+    }
+    private void saveFriendlyFire(String clanName, boolean enabled) {
+        File clansFile = new File(plugin.getDataFolder(), "clans.yml");
+        YamlConfiguration cfg = YamlConfiguration.loadConfiguration(clansFile);
+
+        cfg.set("friendlyFire." + clanName, enabled);
+
+        try {
+            cfg.save(clansFile);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     /**

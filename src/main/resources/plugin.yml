@@ -44,7 +44,9 @@ commands:
     description: Административные команды для кланов
     usage: /clanadmin <subcommand>
     permission: clan.admin
-
+  clanpvp:
+    description: Включить или отключить PVP между соклановцами
+    usage: /clanpvp <on|off>
 permissions:
   clan.admin:
     description: Право выполнять админские команды клана

@@ -187,5 +187,14 @@ public class PlayerDataManager {
         }
         return members;
     }
+    public boolean isClanPvpEnabled(String clanName) {
+        return playerData.getBoolean("pvp." + clanName, false); // по умолчанию выключено
+    }
+
+    public void setClanPvp(String clanName, boolean enabled) {
+        playerData.set("pvp." + clanName, enabled);
+        save();
+    }
+
 }
 
