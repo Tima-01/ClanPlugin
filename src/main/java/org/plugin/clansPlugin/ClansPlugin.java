@@ -58,16 +58,16 @@ public class ClansPlugin extends JavaPlugin {
 
         getLogger().info("ClansPlugin включен.");
 
-<<<<<<< HEAD
+
         // 5) Регистрация плейсхолдеров
         if (Bukkit.getPluginManager().isPluginEnabled("PlaceholderAPI")) {
             clanExpansion = new ClanExpansion(this);
             clanExpansion.register();
         }
-=======
+
         // 5) Плейсхолдеры
         new ClanExpansion(this).register();
->>>>>>> 85a546f (domain expansion malevolent shrine)
+
     }
 
     @Override

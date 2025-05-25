@@ -42,8 +42,16 @@ public class ShowBaseCommand implements CommandExecutor {
             return true;
         }
 
-        int size = 96; // 6 чанков = 96 блоков
-        int half = size / 2;
+        // Получаем количество участников клана
+        int memberCount = playerDataManager.getClanMembers(clanName).size();
+
+        // Вычисляем длину стороны в чанках и переводим в блоки
+        int baseSideLength = 6;
+        int membersPerExpansion = 1;
+        int sideLengthChunks = baseSideLength + (memberCount / membersPerExpansion);
+        int sizeBlocks = sideLengthChunks * 16;
+        int half = sizeBlocks / 2;
+
         World world = center.getWorld();
         int y = center.getBlockY() + 1;
 
@@ -51,13 +59,10 @@ public class ShowBaseCommand implements CommandExecutor {
 
         // Проходимся по периметру
         for (int i = -half; i <= half; i++) {
-            // Север и юг
-            Location north = new Location(world, center.getX() + i, y, center.getZ() - half);
-            Location south = new Location(world, center.getX() + i, y, center.getZ() + half);
-
-            // Запад и восток
-            Location west = new Location(world, center.getX() - half, y, center.getZ() + i);
-            Location east = new Location(world, center.getX() + half, y, center.getZ() + i);
+            Location north = new Location(world, center.getBlockX() + i, y, center.getBlockZ() - half);
+            Location south = new Location(world, center.getBlockX() + i, y, center.getBlockZ() + half);
+            Location west  = new Location(world, center.getBlockX() - half, y, center.getBlockZ() + i);
+            Location east  = new Location(world, center.getBlockX() + half, y, center.getBlockZ() + i);
 
             for (Location loc : new Location[]{north, south, west, east}) {
                 if (loc.getBlock().getType() == Material.AIR) {
@@ -67,7 +72,7 @@ public class ShowBaseCommand implements CommandExecutor {
             }
         }
 
-        // Убираем через 3 секунды
+        // Убираем границу через 3 секунды
         new BukkitRunnable() {
             @Override
             public void run() {
@@ -75,7 +80,7 @@ public class ShowBaseCommand implements CommandExecutor {
                     player.sendBlockChange(entry.getKey(), entry.getValue());
                 }
             }
-        }.runTaskLater(ClansPlugin.getInstance(), 60L); // 60 тиков = 3 секунды
+        }.runTaskLater(ClansPlugin.getInstance(), 60L);
 
         player.sendMessage(ChatColor.GREEN + "Границы базы визуализированы стеклом на 3 секунды.");
         return true;

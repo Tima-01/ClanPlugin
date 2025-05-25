@@ -179,29 +179,31 @@ public class TerritoryManager {
 
     public void adjustClanTerritorySize(String clanName, int memberCount) {
         int baseSideLength = 6; // начальная сторона квадрата
-        int membersPerExpansion = 5; // сколько участников нужно для расширения на +1
+        int membersPerExpansion = 1; // сколько участников нужно для расширения на +1
         int sideLength = baseSideLength + (memberCount / membersPerExpansion);
-        int totalChunks = sideLength * sideLength;
 
         Location center = getClanBaseCenter(clanName);
         if (center == null) return;
 
-        // Генерация списка чанков для новой территории
         List<String> newChunks = new ArrayList<>();
         int centerChunkX = center.getBlockX() >> 4;
         int centerChunkZ = center.getBlockZ() >> 4;
-        int radius = sideLength / 2;
 
-        for (int dx = -radius; dx <= radius; dx++) {
-            for (int dz = -radius; dz <= radius; dz++) {
-                int chunkX = centerChunkX + dx;
-                int chunkZ = centerChunkZ + dz;
-                newChunks.add(chunkX + "," + chunkZ);
+        int radius = sideLength / 2;
+        int startX = centerChunkX - radius;
+        int startZ = centerChunkZ - radius;
+        int endX = startX + sideLength - 1;
+        int endZ = startZ + sideLength - 1;
+
+        for (int dx = startX; dx <= endX; dx++) {
+            for (int dz = startZ; dz <= endZ; dz++) {
+                newChunks.add(dx + "," + dz);
             }
         }
 
         setClanChunks(clanName, newChunks);
     }
+
 
     /**
      * Возвращает центр базы клана в виде Location.

@@ -143,22 +143,46 @@ public class ClanCommand implements CommandExecutor {
                             player.sendMessage(ChatColor.RED + "Ты ещё не в клане.");
                             return true;
                         }
+
                         String clanName = pdm.getPlayerClan(player.getName());
                         List<String> members = pdm.getClanMembers(clanName);
                         String leader = pdm.getClanLeader(clanName);
 
                         player.sendMessage(ChatColor.GOLD + "=====[ Инфо о клане ]=====");
                         player.sendMessage(ChatColor.YELLOW + "Клан: " + ChatColor.AQUA + clanName);
+
                         if (leader != null) {
                             player.sendMessage(ChatColor.YELLOW + "Лидер: " + ChatColor.LIGHT_PURPLE + leader);
                         }
+
                         player.sendMessage(ChatColor.YELLOW + "Участники: ");
                         for (String member : members) {
                             player.sendMessage(ChatColor.GRAY + "- " + member);
                         }
+
+                        // Координаты базы
+                        Location base = territoryManager.getClanBaseCenter(clanName);
+                        if (base != null) {
+                            String coords = base.getWorld().getName() + " [" + base.getBlockX() + ", " + base.getBlockY() + ", " + base.getBlockZ() + "]";
+                            player.sendMessage(ChatColor.YELLOW + "База: " + ChatColor.AQUA + coords);
+
+                            // Размер территории в чанках
+                            int baseSideLength = 6;
+                            int membersPerExpansion = 1;
+                            int memberCount = members.size();
+                            int sideLength = baseSideLength + (memberCount / membersPerExpansion);
+                            int totalChunks = sideLength * sideLength;
+
+                            player.sendMessage(ChatColor.YELLOW + "Размер территории: " + ChatColor.AQUA + sideLength + "x" + sideLength +
+                                    ChatColor.GRAY + " (" + totalChunks + " чанков)");
+                        } else {
+                            player.sendMessage(ChatColor.YELLOW + "База: " + ChatColor.RED + "не установлена");
+                        }
+
                         player.sendMessage(ChatColor.GOLD + "=========================");
                         return true;
                     }
+
 
                     case "reload" -> {
                         if (!player.hasPermission("clan.admin")) {
