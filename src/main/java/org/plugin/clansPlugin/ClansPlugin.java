@@ -3,19 +3,16 @@ package org.plugin.clansPlugin;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.plugin.clansPlugin.commands.*;
-<<<<<<< HEAD
 import org.plugin.clansPlugin.managers.*;
 import org.plugin.clansPlugin.listeners.InventoryClickListener;
 import org.plugin.clansPlugin.listeners.PlayerChatListener;
 import org.plugin.clansPlugin.listeners.PlayerJoinListener;
 import org.plugin.clansPlugin.listeners.PlayerMoveListener;
-=======
 import org.plugin.clansPlugin.listeners.*;
 import org.plugin.clansPlugin.managers.ClanManager;
 import org.plugin.clansPlugin.managers.PlayerDataManager;
 import org.plugin.clansPlugin.managers.TerritoryManager;
 import org.plugin.clansPlugin.managers.VoteManager;
->>>>>>> edf21f7 (пвп)
 import org.plugin.clansPlugin.placeholders.ClanExpansion;
 
 public class ClansPlugin extends JavaPlugin {
@@ -75,11 +72,7 @@ public class ClansPlugin extends JavaPlugin {
             clanExpansion = new ClanExpansion(this);
             clanExpansion.register();
         }
-
-        // 5) Плейсхолдеры
-        new ClanExpansion(this).register();
-
-    }
+            }
 
     @Override
     public void onDisable() {
