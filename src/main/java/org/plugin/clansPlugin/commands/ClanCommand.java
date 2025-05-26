@@ -9,7 +9,6 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.plugin.clansPlugin.ClansPlugin;
-import org.plugin.clansPlugin.buffs.ClanBuff;
 import org.plugin.clansPlugin.gui.BuffSelectionGUI;
 import org.plugin.clansPlugin.managers.ClanManager;
 import org.plugin.clansPlugin.managers.PlayerDataManager;

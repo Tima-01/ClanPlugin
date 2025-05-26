@@ -18,8 +18,8 @@ public class BuffSelectionGUI {
     private final ClanBuffManager buffManager;
     private final String clanId;
     private final Player leader;
-
     private final Inventory gui;
+    private static final int CUSTOM_MODEL_DATA = 1001; // Константа для CustomModelData
 
     public BuffSelectionGUI(ClanBuffManager buffManager, String clanId, Player leader) {
         this.buffManager = buffManager;
@@ -37,17 +37,22 @@ public class BuffSelectionGUI {
             ClanBuff buff = buffs[i];
             ItemStack item = new ItemStack(getMaterialForBuff(buff));
             ItemMeta meta = item.getItemMeta();
-            meta.setDisplayName(ChatColor.GREEN + buff.getDisplayName());
 
-            // Описание эффектов
-            meta.setLore(Arrays.asList(
-                    ChatColor.GRAY + "Основной: " + ChatColor.YELLOW +
-                            buff.getPrimaryEffect().getName() + " " + (buff.getPrimaryAmplifier() + 1),
-                    ChatColor.GRAY + "Дополнительный: " + ChatColor.YELLOW +
-                            buff.getSecondaryEffect().getName() + " " + (buff.getSecondaryAmplifier() + 1)
-            ));
+            // Устанавливаем CustomModelData
+            if (meta != null) {
+                meta.setDisplayName(ChatColor.GREEN + buff.getDisplayName());
+                meta.setCustomModelData(CUSTOM_MODEL_DATA); // Вот эта строка добавляет CustomModelData
 
-            item.setItemMeta(meta);
+                meta.setLore(Arrays.asList(
+                        ChatColor.GRAY + "Основной: " + ChatColor.YELLOW +
+                                buff.getPrimaryEffect().getName() + " " + (buff.getPrimaryAmplifier() + 1),
+                        ChatColor.GRAY + "Дополнительный: " + ChatColor.YELLOW +
+                                buff.getSecondaryEffect().getName() + " " + (buff.getSecondaryAmplifier() + 1)
+                ));
+
+                item.setItemMeta(meta);
+            }
+
             gui.setItem(startSlot + i, item);
         }
     }
@@ -62,7 +67,6 @@ public class BuffSelectionGUI {
             default: return Material.BONE;
         }
     }
-
 
     public void open() {
         leader.openInventory(gui);
