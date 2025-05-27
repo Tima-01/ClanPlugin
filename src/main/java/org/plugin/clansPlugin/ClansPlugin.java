@@ -61,7 +61,7 @@ public class ClansPlugin extends JavaPlugin {
         getCommand("clan").setExecutor(new ClanCommand(this));
         getCommand("startvote").setExecutor(new StartVoteCommand(voteManager));
         getCommand("addplayer").setExecutor(new AddPlayerCommand(playerDataManager));
-        getCommand("removeplayer").setExecutor(new RemovePlayerCommand(playerDataManager));
+        getCommand("removeplayer").setExecutor(new RemovePlayerCommand(playerDataManager, territoryManager));
         getCommand("votel").setExecutor(new VoteCommand(voteManager));
 
         getLogger().info("ClansPlugin включен.");

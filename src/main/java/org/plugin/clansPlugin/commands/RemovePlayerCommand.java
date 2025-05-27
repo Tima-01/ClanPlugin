@@ -7,13 +7,16 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.plugin.clansPlugin.managers.PlayerDataManager;
+import org.bukkit.Location;
+import org.plugin.clansPlugin.managers.TerritoryManager;
 
 public class RemovePlayerCommand implements CommandExecutor {
 
     private final PlayerDataManager playerDataManager;
-
-    public RemovePlayerCommand(PlayerDataManager playerDataManager) {
+    private final TerritoryManager territoryManager;
+    public RemovePlayerCommand(PlayerDataManager playerDataManager, TerritoryManager territoryManager) {
         this.playerDataManager = playerDataManager;
+        this.territoryManager = territoryManager;
     }
 
     @Override
@@ -64,6 +67,22 @@ public class RemovePlayerCommand implements CommandExecutor {
         Player targetPlayer = Bukkit.getPlayerExact(targetName);
         if (targetPlayer != null && targetPlayer.isOnline()) {
             targetPlayer.sendMessage(ChatColor.YELLOW + "Вы были удалены из клана " + targetClan + ".");
+        }
+
+// === СЖАТИЕ ТЕРРИТОРИИ ПОСЛЕ ИСКЛЮЧЕНИЯ ===
+        int updatedSize = playerDataManager.getClanMembers(targetClan).size();
+        if (updatedSize > 0) {
+            int newTerritorySize = Math.max(4, (int) Math.sqrt(updatedSize * 2) + 2);
+            int[] currentTerritory = territoryManager.getClanTerritory(targetClan);
+            if (currentTerritory != null && targetPlayer != null) {
+                int centerX = (currentTerritory[0] + currentTerritory[2]) / 2;
+                int centerZ = (currentTerritory[1] + currentTerritory[3]) / 2;
+                Location center = new Location(targetPlayer.getWorld(), centerX << 4, 0, centerZ << 4);
+                territoryManager.deleteClanTerritory(targetClan);
+                territoryManager.createSquareTerritory(targetClan, center, newTerritorySize);
+            }
+        } else {
+            territoryManager.deleteClanTerritory(targetClan);
         }
 
         return true;
