@@ -28,7 +28,6 @@ public class ClanAdminCommand implements CommandExecutor {
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-
         if (!sender.hasPermission("clans.admin")) {
             sender.sendMessage(ChatColor.RED + "У тебя нет прав для этой команды.");
             return true;
@@ -40,11 +39,11 @@ public class ClanAdminCommand implements CommandExecutor {
             sender.sendMessage(ChatColor.YELLOW + "/clanadmin members <клан> - список участников клана");
             sender.sendMessage(ChatColor.YELLOW + "/clanadmin bases - список баз с координатами");
             sender.sendMessage(ChatColor.YELLOW + "/clanadmin tpbase <клан> - телепорт к базе");
+            sender.sendMessage(ChatColor.YELLOW + "/clanadmin deletebase <клан> - удалить базу клана");
             return true;
         }
 
         switch (args[0].toLowerCase()) {
-
             case "list" -> {
                 List<String> allClans = clanManager.getClans();
                 if (allClans == null || allClans.isEmpty()) {
@@ -52,7 +51,8 @@ public class ClanAdminCommand implements CommandExecutor {
                 } else {
                     sender.sendMessage(ChatColor.GREEN + "Список кланов:");
                     for (String clan : allClans) {
-                        sender.sendMessage(ChatColor.YELLOW + "- " + clan);
+                        String leader = playerDataManager.getClanLeader(clan);
+                        sender.sendMessage(ChatColor.YELLOW + "- " + clan + (leader != null ? " (Лидер: " + leader + ")" : ""));
                     }
                 }
             }
@@ -63,30 +63,38 @@ public class ClanAdminCommand implements CommandExecutor {
                     return true;
                 }
                 String clan = args[1];
+                if (!clanManager.clanExists(clan)) {
+                    sender.sendMessage(ChatColor.RED + "Клан не найден.");
+                    return true;
+                }
                 List<String> members = playerDataManager.getClanMembers(clan);
                 if (members.isEmpty()) {
                     sender.sendMessage(ChatColor.GRAY + "У этого клана нет участников.");
                 } else {
                     sender.sendMessage(ChatColor.GREEN + "Участники клана " + clan + ":");
                     for (String member : members) {
-                        sender.sendMessage(ChatColor.YELLOW + "- " + member);
+                        String role = member.equals(playerDataManager.getClanLeader(clan)) ? " [Лидер]" : "";
+                        sender.sendMessage(ChatColor.YELLOW + "- " + member + role);
                     }
                 }
             }
 
             case "bases" -> {
-                Set<String> clansWithBases = territoryManager.getAllClanBases();
-                if (clansWithBases.isEmpty()) {
-                    sender.sendMessage(ChatColor.GRAY + "Нет баз.");
-                    return true;
-                }
+                boolean hasBases = false;
                 sender.sendMessage(ChatColor.GREEN + "Базы кланов:");
-                for (String clan : clansWithBases) {
-                    Location base = territoryManager.getBaseLocation(clan);
-                    if (base != null) {
-                        sender.sendMessage(ChatColor.YELLOW + clan + ": " + base.getWorld().getName()
-                                + " [" + base.getBlockX() + ", " + base.getBlockY() + ", " + base.getBlockZ() + "]");
+                for (String clan : clanManager.getClans()) {
+                    int[] territory = territoryManager.getClanTerritory(clan);
+                    if (territory != null) {
+                        hasBases = true;
+                        Location center = territoryManager.getClanBaseCenter(clan);
+                        sender.sendMessage(ChatColor.YELLOW + clan + ": " +
+                                "Мир: " + center.getWorld().getName() +
+                                ", Центр: [" + center.getBlockX() + ", " + center.getBlockY() + ", " + center.getBlockZ() + "]" +
+                                ", Границы: X[" + territory[0] + "-" + territory[2] + "], Z[" + territory[1] + "-" + territory[3] + "]");
                     }
+                }
+                if (!hasBases) {
+                    sender.sendMessage(ChatColor.GRAY + "Нет баз.");
                 }
             }
 
@@ -100,20 +108,41 @@ public class ClanAdminCommand implements CommandExecutor {
                     return true;
                 }
                 String clan = args[1];
-                Location baseLocation = territoryManager.getBaseLocation(clan);
+                if (!clanManager.clanExists(clan)) {
+                    sender.sendMessage(ChatColor.RED + "Клан не найден.");
+                    return true;
+                }
+                Location baseLocation = territoryManager.getClanBaseCenter(clan);
                 if (baseLocation == null) {
-                    sender.sendMessage(ChatColor.RED + "База этого клана не найдена.");
+                    sender.sendMessage(ChatColor.RED + "У этого клана нет базы.");
                 } else {
                     player.teleport(baseLocation);
                     sender.sendMessage(ChatColor.GREEN + "Телепортация к базе клана " + clan);
                 }
             }
 
+            case "deletebase" -> {
+                if (args.length < 2) {
+                    sender.sendMessage(ChatColor.RED + "Укажи клан: /clanadmin deletebase <клан>");
+                    return true;
+                }
+                String clan = args[1];
+                if (!clanManager.clanExists(clan)) {
+                    sender.sendMessage(ChatColor.RED + "Клан не найден.");
+                    return true;
+                }
+                if (territoryManager.getClanTerritory(clan) == null) {
+                    sender.sendMessage(ChatColor.RED + "У этого клана нет базы.");
+                    return true;
+                }
+                territoryManager.deleteClanTerritory(clan);
+                sender.sendMessage(ChatColor.GREEN + "База клана " + clan + " успешно удалена!");
+            }
+
             default -> {
                 sender.sendMessage(ChatColor.RED + "Неизвестная подкоманда. Используй /clanadmin");
             }
         }
-
         return true;
     }
 }

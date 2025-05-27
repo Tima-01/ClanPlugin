@@ -4,7 +4,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
-import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -41,12 +40,12 @@ public class BuffSelectionGUI {
             // Устанавливаем CustomModelData
             if (meta != null) {
                 meta.setDisplayName(ChatColor.GREEN + buff.getDisplayName());
-                meta.setCustomModelData(CUSTOM_MODEL_DATA); // Вот эта строка добавляет CustomModelData
+                meta.setCustomModelData(CUSTOM_MODEL_DATA);
 
                 meta.setLore(Arrays.asList(
-                        ChatColor.GRAY + "Основной: " + ChatColor.YELLOW +
+                        ChatColor.GRAY + "Основной: " + ChatColor.WHITE +
                                 buff.getPrimaryEffect().getName() + " " + (buff.getPrimaryAmplifier() + 1),
-                        ChatColor.GRAY + "Дополнительный: " + ChatColor.YELLOW +
+                        ChatColor.GRAY + "Дополнительный: " + ChatColor.WHITE +
                                 buff.getSecondaryEffect().getName() + " " + (buff.getSecondaryAmplifier() + 1)
                 ));
 
@@ -61,8 +60,8 @@ public class BuffSelectionGUI {
         switch (buff) {
             case WOLF: return Material.WOLF_SPAWN_EGG;
             case ARKHAR: return Material.GOAT_SPAWN_EGG;
-            case SNOW_LEOPARD: return Material.OCELOT_SPAWN_EGG;
-            case EAGLE: return Material.PARROT_SPAWN_EGG;
+            case SNOW_LEOPARD: return Material.SHEEP_SPAWN_EGG;
+            case EAGLE: return Material.FEATHER;
             case HORSE: return Material.HORSE_SPAWN_EGG;
             default: return Material.BONE;
         }

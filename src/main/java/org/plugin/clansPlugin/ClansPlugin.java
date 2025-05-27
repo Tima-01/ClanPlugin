@@ -72,7 +72,7 @@ public class ClansPlugin extends JavaPlugin {
             clanExpansion = new ClanExpansion(this);
             clanExpansion.register();
         }
-            }
+    }
 
     @Override
     public void onDisable() {

@@ -1,30 +1,23 @@
 package org.plugin.clansPlugin.managers;
 
-import org.bukkit.Bukkit;
-import org.bukkit.Chunk;
-import org.bukkit.Location;
-import org.bukkit.World;
+import org.bukkit.*;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 public class TerritoryManager {
 
     private final JavaPlugin plugin;
     private File territoryFile;
     private YamlConfiguration territoryData;
-    private final java.util.Map<String, Set<Chunk>> territories = new java.util.HashMap<>();
 
     public TerritoryManager(JavaPlugin plugin) {
         this.plugin = plugin;
-        plugin.saveResource("territories.yml", false);
+        initTerritoryFile();
     }
 
     public void initTerritoryFile() {
@@ -39,16 +32,6 @@ public class TerritoryManager {
         }
         territoryData = YamlConfiguration.loadConfiguration(territoryFile);
     }
-    public void saveTerritories() {
-        for (String clan : territories.keySet()) {
-            List<String> chunkList = new java.util.ArrayList<>();
-            for (Chunk chunk : territories.get(clan)) {
-                chunkList.add(chunk.getX() + "," + chunk.getZ());
-            }
-            territoryData.set("territories." + clan, chunkList);
-        }
-        saveTerritoryData();
-    }
 
     public void saveTerritoryData() {
         try {
@@ -59,223 +42,343 @@ public class TerritoryManager {
     }
 
     /**
-     * Вернуть список чанков (строк вида "x,z") для заданного клана.
-     * Если у клана нет базы — вернуть пустой список.
+     * Сохраняет территорию клана в виде квадрата (4 угловые точки)
+     * Формат: minX,minZ,maxX,maxZ
      */
-    public List<String> getClanChunks(String clanName) {
-        if (!territoryData.contains("territories." + clanName)) return Collections.emptyList();
-        return territoryData.getStringList("territories." + clanName);
-    }
-
-    /**
-     * Сохранить список чанков для клана (перезаписать существующую базу).
-     */
-    public void setClanChunks(String clanName, List<String> chunks) {
-        territoryData.set("territories." + clanName, chunks);
+    public void setClanTerritory(String clanName, int minX, int minZ, int maxX, int maxZ) {
+        territoryData.set("territories." + clanName, minX + "," + minZ + "," + maxX + "," + maxZ);
         saveTerritoryData();
     }
 
     /**
-     * Удалить базу клана.
+     * Получает границы территории клана
+     * @return массив [minX, minZ, maxX, maxZ] или null если нет территории
      */
-    public void deleteClanChunks(String clanName) {
-        territoryData.set("territories." + clanName, null);
-        saveTerritoryData();
-    }
-    /**
-     *
-     */
-    public YamlConfiguration getTerritoryData() {
-        return territoryData;
+    public int[] getClanTerritory(String clanName) {
+        if (!territoryData.contains("territories." + clanName)) {
+            return null;
+        }
+
+        String[] coords = territoryData.getString("territories." + clanName).split(",");
+        return new int[]{
+                Integer.parseInt(coords[0]),
+                Integer.parseInt(coords[1]),
+                Integer.parseInt(coords[2]),
+                Integer.parseInt(coords[3])
+        };
     }
 
     /**
-     * По координатам чанка (chunkX, chunkZ) найти, на территории какого клана сейчас находится игрок.
-     * Если в этом чанке нет ни одной базы — вернуть null.
+     * Проверяет, находится ли чанк на территории клана
+     */
+    public boolean isInTerritory(String clanName, int chunkX, int chunkZ) {
+        int[] territory = getClanTerritory(clanName);
+        if (territory == null) return false;
+
+        return chunkX >= territory[0] &&
+                chunkX <= territory[2] &&
+                chunkZ >= territory[1] &&
+                chunkZ <= territory[3];
+    }
+
+    /**
+     * Получает клан, которому принадлежит чанк
      */
     public String getClanByChunk(int chunkX, int chunkZ) {
-        if (!territoryData.contains("territories")) return null;
-        ConfigurationSection sec = territoryData.getConfigurationSection("territories");
-        if (sec == null) return null;
+        // Сначала проверяем основные территории
+        String clan = getClanByMainTerritory(chunkX, chunkZ);
+        if (clan != null) return clan;
 
-        // Перебираем все кланы, у которых есть список чанков
-        for (String clanName : sec.getKeys(false)) {
-            List<String> chunks = territoryData.getStringList("territories." + clanName);
-            for (String coord : chunks) {
-                String[] parts = coord.split(",");
-                int cX = Integer.parseInt(parts[0]);
-                int cZ = Integer.parseInt(parts[1]);
-                if (cX == chunkX && cZ == chunkZ) {
-                    return clanName;
+        // Затем проверяем территории флагов
+        if (territoryData.contains("flags")) {
+            for (String clanName : territoryData.getConfigurationSection("flags").getKeys(false)) {
+                for (String flagId : territoryData.getConfigurationSection("flags." + clanName).getKeys(false)) {
+                    String[] data = territoryData.getString("flags." + clanName + "." + flagId).split(",");
+                    if (data.length >= 4) {
+                        int minX = Integer.parseInt(data[0]);
+                        int minZ = Integer.parseInt(data[1]);
+                        int maxX = Integer.parseInt(data[2]);
+                        int maxZ = Integer.parseInt(data[3]);
+
+                        if (chunkX >= minX && chunkX <= maxX && chunkZ >= minZ && chunkZ <= maxZ) {
+                            return clanName;
+                        }
+                    }
                 }
+            }
+        }
+
+        return null;
+    }
+
+    private String getClanByMainTerritory(int chunkX, int chunkZ) {
+        if (!territoryData.contains("territories")) return null;
+
+        for (String clanName : territoryData.getConfigurationSection("territories").getKeys(false)) {
+            if (isInTerritory(clanName, chunkX, chunkZ)) {
+                return clanName;
             }
         }
         return null;
     }
 
     /**
-     * Проверка пересечения территории нового клана с уже созданными.
-     * Возвращает true, если база перекрывается с любым другим кланом.
+     * Рассчитывает границы территории на основе центра и количества чанков
      */
-    public boolean isOverlapping(int centerChunkX, int centerChunkZ) {
-        if (!territoryData.contains("territories")) return false;
-        ConfigurationSection sec = territoryData.getConfigurationSection("territories");
-        if (sec == null) return false;
+    public void createSquareTerritory(String clanName, Location center, int sideLength) {
+        int centerX = center.getBlockX() >> 4;
+        int centerZ = center.getBlockZ() >> 4;
 
-        for (String clanName : sec.getKeys(false)) {
-            List<String> chunks = territoryData.getStringList("territories." + clanName);
-            for (String coord : chunks) {
-                String[] parts = coord.split(",");
-                int ox = Integer.parseInt(parts[0]);
-                int oz = Integer.parseInt(parts[1]);
-                // если новая база в радиусе 6 чанков от уже существующей
-                if (Math.abs(ox - centerChunkX) < 6 && Math.abs(oz - centerChunkZ) < 6) {
-                    return true;
-                }
+        int radius = sideLength / 2;
+        int minX = centerX - radius;
+        int minZ = centerZ - radius;
+        int maxX = centerX + radius;
+        int maxZ = centerZ + radius;
+
+        setClanTerritory(clanName, minX, minZ, maxX, maxZ);
+    }
+
+    /**
+     * Удаляет территорию клана
+     */
+    public void deleteClanTerritory(String clanName) {
+        territoryData.set("territories." + clanName, null);
+        saveTerritoryData();
+    }
+
+    /**
+     * Проверяет пересечение территорий
+     */
+    public boolean isOverlapping(int centerX, int centerZ, int sideLength) {
+        return isOverlapping(centerX, centerZ, sideLength, null);
+    }
+
+    /**
+     * Проверяет пересечение территорий (с исключением определенного клана)
+     */
+    public boolean isOverlapping(int centerX, int centerZ, int sideLength, String excludeClan) {
+        if (!territoryData.contains("territories")) return false;
+
+        int radius = sideLength / 2;
+        int newMinX = centerX - radius;
+        int newMinZ = centerZ - radius;
+        int newMaxX = centerX + radius;
+        int newMaxZ = centerZ + radius;
+
+        for (String clanName : territoryData.getConfigurationSection("territories").getKeys(false)) {
+            if (clanName.equals(excludeClan)) continue;
+
+            int[] territory = getClanTerritory(clanName);
+            if (territory == null) continue;
+
+            // Проверка пересечения прямоугольников
+            if (newMaxX >= territory[0] && newMinX <= territory[2] &&
+                    newMaxZ >= territory[1] && newMinZ <= territory[3]) {
+                return true;
             }
         }
         return false;
     }
-    public Set<Chunk> calculateTerritory(Location center, int chunkCount) {
-        Set<Chunk> result = new java.util.HashSet<>();
-        if (center == null || center.getWorld() == null) return result;
-
-        int cx = center.getChunk().getX();
-        int cz = center.getChunk().getZ();
-        World world = center.getWorld();
-
-        java.util.Queue<int[]> queue = new java.util.LinkedList<>();
-        java.util.Set<String> visited = new java.util.HashSet<>();
-
-        queue.add(new int[]{cx, cz});
-        visited.add(cx + "," + cz);
-
-        while (!queue.isEmpty() && result.size() < chunkCount) {
-            int[] coords = queue.poll();
-            int x = coords[0];
-            int z = coords[1];
-
-            Chunk chunk = world.getChunkAt(x, z);
-            result.add(chunk);
-
-            // Добавляем соседние чанки (в 4 стороны)
-            int[][] directions = {
-                    {1, 0}, {-1, 0}, {0, 1}, {0, -1}
-            };
-
-            for (int[] dir : directions) {
-                int nx = x + dir[0];
-                int nz = z + dir[1];
-                String key = nx + "," + nz;
-                if (!visited.contains(key)) {
-                    visited.add(key);
-                    queue.add(new int[]{nx, nz});
-                }
-            }
-        }
-
-        return result;
-    }
-
-    public void adjustClanTerritorySize(String clanName, int memberCount) {
-        int baseSideLength = 6; // начальная сторона квадрата
-        int membersPerExpansion = 1; // сколько участников нужно для расширения на +1
-        int sideLength = baseSideLength + (memberCount / membersPerExpansion);
-
-        Location center = getClanBaseCenter(clanName);
-        if (center == null) return;
-
-        List<String> newChunks = new ArrayList<>();
-        int centerChunkX = center.getBlockX() >> 4;
-        int centerChunkZ = center.getBlockZ() >> 4;
-
-        int radius = sideLength / 2;
-        int startX = centerChunkX - radius;
-        int startZ = centerChunkZ - radius;
-        int endX = startX + sideLength - 1;
-        int endZ = startZ + sideLength - 1;
-
-        for (int dx = startX; dx <= endX; dx++) {
-            for (int dz = startZ; dz <= endZ; dz++) {
-                newChunks.add(dx + "," + dz);
-            }
-        }
-
-        setClanChunks(clanName, newChunks);
-    }
-
 
     /**
-     * Возвращает центр базы клана в виде Location.
-     * Если у клана нет сохранённых чанков, возвращает null.
-     *
-     * Логика:
-     * 1) Считываем список строк "chunkX,chunkZ" для данного clanName.
-     * 2) Находим минимальные и максимальные значения chunkX и chunkZ среди всех чанков базы.
-     * 3) Рассчитываем центральный чанк: (minX + maxX) / 2, (minZ + maxZ) / 2.
-     * 4) Переводим координаты "центр чанка" в координаты блока: centerChunkX * 16 + 8, centerChunkZ * 16 + 8.
-     * 5) Определяем высоту Y, используя самый высокий блок на этой X,Z через world.getHighestBlockYAt().
-     * 6) Берём первый доступный мир сервера (если у вас лишь один мир — этого достаточно).
+     * Получает центр территории клана
      */
     public Location getClanBaseCenter(String clanName) {
-        if (!territoryData.contains("territories." + clanName)) {
-            return null;
-        }
+        int[] territory = getClanTerritory(clanName);
+        if (territory == null) return null;
 
-        List<String> chunks = territoryData.getStringList("territories." + clanName);
-        if (chunks.isEmpty()) {
-            return null;
-        }
+        int centerX = (territory[0] + territory[2]) / 2;
+        int centerZ = (territory[1] + territory[3]) / 2;
 
-        int minChunkX = Integer.MAX_VALUE;
-        int maxChunkX = Integer.MIN_VALUE;
-        int minChunkZ = Integer.MAX_VALUE;
-        int maxChunkZ = Integer.MIN_VALUE;
-
-        for (String coord : chunks) {
-            String[] parts = coord.split(",");
-            int cX = Integer.parseInt(parts[0].trim());
-            int cZ = Integer.parseInt(parts[1].trim());
-
-            if (cX < minChunkX) minChunkX = cX;
-            if (cX > maxChunkX) maxChunkX = cX;
-            if (cZ < minChunkZ) minChunkZ = cZ;
-            if (cZ > maxChunkZ) maxChunkZ = cZ;
-        }
-
-        int centerChunkX = (minChunkX + maxChunkX) / 2;
-        int centerChunkZ = (minChunkZ + maxChunkZ) / 2;
-
-        int blockX = centerChunkX * 16 + 8;
-        int blockZ = centerChunkZ * 16 + 8;
-
-        World world = Bukkit.getServer().getWorlds().get(0);
-        if (world == null) {
-            return null;
-        }
-
+        World world = Bukkit.getWorlds().get(0);
+        int blockX = centerX * 16 + 8;
+        int blockZ = centerZ * 16 + 8;
         int blockY = world.getHighestBlockYAt(blockX, blockZ);
 
         return new Location(world, blockX, blockY, blockZ);
     }
 
-    // --- Новые методы ниже ---
+    public void addClanFlag(String clanName, Location flagLocation) {
+        String flagKey = "flags." + clanName + "." + UUID.randomUUID().toString();
+        territoryData.set(flagKey + ".world", flagLocation.getWorld().getName());
+        territoryData.set(flagKey + ".x", flagLocation.getBlockX());
+        territoryData.set(flagKey + ".y", flagLocation.getBlockY());
+        territoryData.set(flagKey + ".z", flagLocation.getBlockZ());
+        saveTerritoryData();
+    }
 
-    /**
-     * Возвращает множество кланов, у которых есть базы (территории).
-     */
-    public Set<String> getAllClanBases() {
-        if (!territoryData.contains("territories")) {
-            return Collections.emptySet();
+    public List<Location> getClanFlags(String clanName) {
+        List<Location> flags = new ArrayList<>();
+        if (!territoryData.contains("flags." + clanName)) {
+            return flags;
         }
-        return territoryData.getConfigurationSection("territories").getKeys(false);
+
+        for (String flagId : territoryData.getConfigurationSection("flags." + clanName).getKeys(false)) {
+            String[] data = territoryData.getString("flags." + clanName + "." + flagId).split(",");
+            if (data.length == 7) {
+                World world = Bukkit.getWorlds().get(0); // Получаем основной мир
+                int x = Integer.parseInt(data[4]);
+                int y = Integer.parseInt(data[5]);
+                int z = Integer.parseInt(data[6]);
+                flags.add(new Location(world, x, y, z));
+            }
+        }
+        return flags;
+    }
+    /**
+     * Пытается добавить флаг (3x3 чанка) к территории клана
+     * @param flagLocation Местоположение флага (блок)
+     * @param clanName Название клана
+     * @return true если флаг был успешно добавлен, false если невозможно
+     */
+    public boolean addFlagTerritory(String clanName, Location flagLocation) {
+        int flagChunkX = flagLocation.getBlockX() >> 4;
+        int flagChunkZ = flagLocation.getBlockZ() >> 4;
+        int flagSize = 3;
+
+        // Координаты территории флага (3x3 чанка)
+        int flagMinX = flagChunkX - 1;
+        int flagMinZ = flagChunkZ - 1;
+        int flagMaxX = flagChunkX + 1;
+        int flagMaxZ = flagChunkZ + 1;
+
+        // Проверяем пересечение с другими кланами (кроме своего)
+        if (isOverlapping(flagChunkX, flagChunkZ, flagSize, clanName)) {
+            return false;
+        }
+
+        // Проверяем, что флаг примыкает к территории клана
+        if (!isAdjacentToClanTerritory(clanName, flagMinX, flagMinZ, flagMaxX, flagMaxZ)) {
+            return false;
+        }
+
+        // Сохраняем флаг в компактном формате
+        String flagKey = "flags." + clanName + "." + UUID.randomUUID();
+        territoryData.set(flagKey,
+                flagMinX + "," + flagMinZ + "," + flagMaxX + "," + flagMaxZ + "," +
+                        flagLocation.getBlockX() + "," + flagLocation.getBlockY() + "," + flagLocation.getBlockZ());
+
+        saveTerritoryData();
+        return true;
+    }
+
+    private boolean isAdjacentToClanTerritory(String clanName, int minX, int minZ, int maxX, int maxZ) {
+        // Проверяем основную территорию
+        int[] mainTerritory = getClanTerritory(clanName);
+        if (mainTerritory != null && isAdjacent(mainTerritory, minX, minZ, maxX, maxZ)) {
+            return true;
+        }
+
+        // Проверяем все флаги клана
+        if (territoryData.contains("flags." + clanName)) {
+            for (String flagId : territoryData.getConfigurationSection("flags." + clanName).getKeys(false)) {
+                String[] coords = territoryData.getString("flags." + clanName + "." + flagId + ".territory").split(",");
+                int[] flagTerritory = new int[]{
+                        Integer.parseInt(coords[0]),
+                        Integer.parseInt(coords[1]),
+                        Integer.parseInt(coords[2]),
+                        Integer.parseInt(coords[3])
+                };
+
+                if (isAdjacent(flagTerritory, minX, minZ, maxX, maxZ)) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    private boolean isAdjacent(int[] territory1, int minX, int minZ, int maxX, int maxZ) {
+        // Проверяем, что территории соприкасаются хотя бы одной стороной
+        return (maxX == territory1[0] - 1 || minX == territory1[2] + 1 ||
+                maxZ == territory1[1] - 1 || minZ == territory1[3] + 1);
     }
 
     /**
-     * Возвращает локацию базы клана (центр базы), или null, если база не найдена.
-     * В данном случае просто делегируем вызов getClanBaseCenter.
+     * Проверяет, находится ли чанк на территории клана (основной или флагов)
      */
-    public Location getBaseLocation(String clanName) {
-        return getClanBaseCenter(clanName);
+    public boolean isInClanTerritory(String clanName, int chunkX, int chunkZ) {
+        // Проверяем основную территорию
+        if (isInTerritory(clanName, chunkX, chunkZ)) {
+            return true;
+        }
+
+        // Проверяем территории флагов
+        if (territoryData.contains("flags." + clanName)) {
+            for (String flagId : territoryData.getConfigurationSection("flags." + clanName).getKeys(false)) {
+                String[] coords = territoryData.getString("flags." + clanName + "." + flagId + ".territory").split(",");
+                int[] flagTerritory = new int[]{
+                        Integer.parseInt(coords[0]),
+                        Integer.parseInt(coords[1]),
+                        Integer.parseInt(coords[2]),
+                        Integer.parseInt(coords[3])
+                };
+
+                if (chunkX >= flagTerritory[0] && chunkX <= flagTerritory[2] &&
+                        chunkZ >= flagTerritory[1] && chunkZ <= flagTerritory[3]) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
+
+    /**
+     * Удаляет флаг и пересчитывает территорию клана
+     */
+    public boolean removeClanFlag(Location flagLocation) {
+        if (!territoryData.contains("flags")) {
+            return false;
+        }
+
+        for (String clanName : territoryData.getConfigurationSection("flags").getKeys(false)) {
+            ConfigurationSection clanFlags = territoryData.getConfigurationSection("flags." + clanName);
+            for (String flagId : clanFlags.getKeys(false)) {
+                String[] data = clanFlags.getString(flagId).split(",");
+                if (data.length == 7) {
+                    int x = Integer.parseInt(data[4]);
+                    int y = Integer.parseInt(data[5]);
+                    int z = Integer.parseInt(data[6]);
+
+                    if (x == flagLocation.getBlockX() &&
+                            y == flagLocation.getBlockY() &&
+                            z == flagLocation.getBlockZ()) {
+
+                        territoryData.set("flags." + clanName + "." + flagId, null);
+                        saveTerritoryData();
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+    public List<int[]> getAllClanTerritories(String clanName) {
+        List<int[]> territories = new ArrayList<>();
+
+        // Добавляем основную территорию
+        int[] mainTerritory = getClanTerritory(clanName);
+        if (mainTerritory != null) {
+            territories.add(mainTerritory);
+        }
+
+        // Добавляем территории флагов
+        if (territoryData.contains("flags." + clanName)) {
+            for (String flagId : territoryData.getConfigurationSection("flags." + clanName).getKeys(false)) {
+                String[] coords = territoryData.getString("flags." + clanName + "." + flagId + ".territory").split(",");
+                territories.add(new int[]{
+                        Integer.parseInt(coords[0]),
+                        Integer.parseInt(coords[1]),
+                        Integer.parseInt(coords[2]),
+                        Integer.parseInt(coords[3])
+                });
+            }
+        }
+
+        return territories;
+    }
+
 }

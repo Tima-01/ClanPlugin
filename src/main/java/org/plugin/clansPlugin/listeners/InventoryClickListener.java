@@ -1,7 +1,5 @@
 package org.plugin.clansPlugin.listeners;
 
-
-
 import org.bukkit.ChatColor;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
@@ -11,7 +9,6 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
 import org.plugin.clansPlugin.ClansPlugin;
 import org.plugin.clansPlugin.buffs.ClanBuff;
-import org.plugin.clansPlugin.gui.BuffSelectionGUI;
 import org.plugin.clansPlugin.managers.PlayerDataManager;
 
 import java.util.Arrays;
@@ -43,20 +40,34 @@ public class InventoryClickListener implements Listener {
             if (!clans.contains(clan)) return;
 
             PlayerDataManager pdm = plugin.getPlayerDataManager();
-            String current = pdm.getPlayerClan(player.getName());
-            if (clan.equals(current)) {
+            String currentClan = pdm.getPlayerClan(player.getName());
+
+            // Если игрок уже в этом клане
+            if (clan.equals(currentClan)) {
                 player.sendMessage(ChatColor.YELLOW + "Ты уже состоишь в этом клане.");
                 player.closeInventory();
                 return;
             }
 
+            // Если игрок состоит в другом клане - выходим из него
+            if (currentClan != null) {
+                pdm.removePlayerFromClan(player.getName());
+
+                // Если игрок был лидером - снимаем лидерство
+                if (player.getName().equalsIgnoreCase(pdm.getClanLeader(currentClan))) {
+                    pdm.setClanLeader(currentClan, null);
+                }
+
+                // Если в клане не осталось участников - удаляем территорию
+                if (pdm.getClanMembers(currentClan).isEmpty()) {
+                    plugin.getTerritoryManager().deleteClanTerritory(currentClan);
+                }
+            }
+
+            // Вступаем в новый клан
             pdm.setPlayerClan(player.getName(), clan);
             pdm.savePlayerData();
             player.sendMessage(ChatColor.GREEN + "Ты вступил в клан: " + clan);
-
-            int updatedSize = pdm.getClanMembers(clan).size();
-            plugin.getTerritoryManager().adjustClanTerritorySize(clan, updatedSize);
-
             player.closeInventory();
             return;
         }
@@ -65,8 +76,14 @@ public class InventoryClickListener implements Listener {
         if (title.equals(ChatColor.DARK_GREEN + "Выбор духа клана")) {
             event.setCancelled(true);
 
-            if (!plugin.getPlayerDataManager().getClanLeader(plugin.getPlayerDataManager().getPlayerClan(player.getName()))
-                    .equalsIgnoreCase(player.getName())) {
+            String playerClan = plugin.getPlayerDataManager().getPlayerClan(player.getName());
+            if (playerClan == null) {
+                player.sendMessage(ChatColor.RED + "Ты не состоишь в клане.");
+                player.closeInventory();
+                return;
+            }
+
+            if (!player.getName().equalsIgnoreCase(plugin.getPlayerDataManager().getClanLeader(playerClan))) {
                 player.sendMessage(ChatColor.RED + "Только лидер клана может выбрать бафф.");
                 player.closeInventory();
                 return;
@@ -82,15 +99,13 @@ public class InventoryClickListener implements Listener {
 
             if (selectedBuff == null) return;
 
-            String clanId = plugin.getPlayerDataManager().getPlayerClan(player.getName());
-
-            if (!plugin.getClanBuffManager().canChangeBuff(clanId)) {
+            if (!plugin.getClanBuffManager().canChangeBuff(playerClan)) {
                 player.sendMessage(ChatColor.RED + "Слишком рано менять бафф. Подождите немного.");
                 player.closeInventory();
                 return;
             }
 
-            plugin.getClanBuffManager().setClanBuff(clanId, selectedBuff);
+            plugin.getClanBuffManager().setClanBuff(playerClan, selectedBuff);
             player.sendMessage(ChatColor.GREEN + "Бафф изменён на: " + selectedBuff.getDisplayName());
             player.closeInventory();
         }
