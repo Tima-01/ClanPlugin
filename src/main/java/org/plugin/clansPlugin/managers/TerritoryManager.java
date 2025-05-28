@@ -29,7 +29,7 @@ public class TerritoryManager {
         initTerritoryFile();
     }
 
-    private DyeColor getClanBannerColor(String clanName) {
+    public DyeColor getClanBannerColor(String clanName) {
         return switch (clanName.toLowerCase()) {
             case "бугу" -> DyeColor.RED;
             case "саруу" -> DyeColor.GREEN;
@@ -286,13 +286,13 @@ public class TerritoryManager {
         Location blockCenter = location.getBlock().getLocation().add(0.5, 0, 0.5);
 
         // Устанавливаем баннер
-        Block block = blockCenter.getBlock();
-        block.setType(Material.valueOf(color.name() + "_BANNER"));
-
-        // Настраиваем баннер
-        Banner banner = (Banner) block.getState();
-        banner.setBaseColor(color);
-        banner.update(true);
+//        Block block = blockCenter.getBlock();
+//        block.setType(Material.valueOf(color.name() + "_BANNER"));
+//
+//        // Настраиваем баннер
+//        Banner banner = (Banner) block.getState();
+//        banner.setBaseColor(color);
+//        banner.update(true);
 
         // Создаем ArmorStand для отображения здоровья
         Location armorStandLoc = blockCenter.clone().add(0, 0, 0);

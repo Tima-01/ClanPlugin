@@ -41,7 +41,7 @@ public class ClansPlugin extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new PlayerChatListener(this), this);
         getServer().getPluginManager().registerEvents(new PlayerMoveListener(this), this);
         getServer().getPluginManager().registerEvents(new ClanDamageListener(this), this);
-        getServer().getPluginManager().registerEvents(new FlagListener(territoryManager),this);
+        getServer().getPluginManager().registerEvents(new FlagListener(territoryManager, this),this);
 
         // 4) Регистрируем команды
         getCommand("clanpvp").setExecutor(new ClanPvpCommand(playerDataManager));

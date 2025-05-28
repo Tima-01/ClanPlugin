@@ -70,16 +70,13 @@ public class SubCommandCreateFlag implements SubCommand {
         if (success) {
             player.sendMessage(ChatColor.GREEN + "Флаг успешно установлен! Создана новая территория 3×3 чанка.");
 
-            // Визуализация: ставим баннер и столб под ним
-            flagLocation.getBlock().setType(Material.BLUE_BANNER);
+            DyeColor clanColor = territoryManager.getClanBannerColor(clanName);
+
+            flagLocation.getBlock().setType(Material.valueOf(clanColor.name() + "_BANNER"));
             Block banner = flagLocation.getBlock();
             Banner bannerState = (Banner) banner.getState();
-            bannerState.setBaseColor(DyeColor.BLUE);
+            bannerState.setBaseColor(clanColor);
             bannerState.update(true);
-
-            for (int i = 1; i <= 2; i++) {
-                flagLocation.clone().subtract(0, i, 0).getBlock().setType(Material.OAK_FENCE);
-            }
 
             player.getWorld().playSound(flagLocation, Sound.ENTITY_PLAYER_LEVELUP, 1.0f, 1.0f);
             player.getWorld().spawnParticle(

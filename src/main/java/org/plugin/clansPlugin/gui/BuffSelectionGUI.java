@@ -62,11 +62,11 @@ public class BuffSelectionGUI {
 
     private Material getMaterialForBuff(ClanBuff buff) {
         switch (buff) {
-            case WOLF: return Material.WOLF_SPAWN_EGG;
-            case ARKHAR: return Material.GOAT_SPAWN_EGG;
-            case SNOW_LEOPARD: return Material.SHEEP_SPAWN_EGG;
+            case WOLF: return Material.BONE_MEAL;
+            case ARKHAR: return Material.GOAT_HORN;
+            case SNOW_LEOPARD: return Material.TROPICAL_FISH;
             case EAGLE: return Material.FEATHER;
-            case HORSE: return Material.HORSE_SPAWN_EGG;
+            case HORSE: return Material.APPLE;
             default: return Material.BONE;
         }
     }
