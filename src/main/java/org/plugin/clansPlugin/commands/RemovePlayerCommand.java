@@ -60,7 +60,16 @@ public class RemovePlayerCommand implements CommandExecutor {
                 }
             }
         }
+        // Проверка: если удаляемый был лидером, снять лидерство
+        String currentLeader = playerDataManager.getClanLeader(targetClan);
+        if (targetName.equalsIgnoreCase(currentLeader)) {
+            playerDataManager.setClanLeader(targetClan, null);
 
+            Player targetPlayer = Bukkit.getPlayerExact(targetName);
+            if (targetPlayer != null && targetPlayer.isOnline()) {
+                targetPlayer.sendMessage(ChatColor.RED + "Ты был лидером. Лидерство клана снято.");
+            }
+        }
         playerDataManager.removePlayerFromClan(targetName);
         sender.sendMessage(ChatColor.GREEN + "Игрок " + targetName + " удален из клана " + targetClan + ".");
 

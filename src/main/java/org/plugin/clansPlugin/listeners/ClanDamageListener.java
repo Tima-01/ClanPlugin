@@ -19,15 +19,17 @@ public class ClanDamageListener implements Listener {
         if (!(event.getDamager() instanceof Player damager)) return;
         if (!(event.getEntity() instanceof Player target)) return;
 
-        String clan1 = plugin.getPlayerDataManager().getPlayerClan(damager.getName());
-        String clan2 = plugin.getPlayerDataManager().getPlayerClan(target.getName());
+        String damagerClan = plugin.getPlayerDataManager().getPlayerClan(damager.getName());
+        String targetClan = plugin.getPlayerDataManager().getPlayerClan(target.getName());
 
-        if (clan1 != null && clan1.equals(clan2)) {
-            boolean pvpAllowed = plugin.getPlayerDataManager().isClanPvpEnabled(clan1);
-            if (!pvpAllowed) {
+        // Только если оба игрока в одном клане и pvp запрещено
+        if (damagerClan != null && damagerClan.equals(targetClan)) {
+            boolean isPvpEnabled = plugin.getPlayerDataManager().isClanPvpEnabled(damagerClan);
+            if (!isPvpEnabled) {
                 event.setCancelled(true);
                 damager.sendMessage("PVP между соклановцами отключено.");
             }
         }
     }
+
 }

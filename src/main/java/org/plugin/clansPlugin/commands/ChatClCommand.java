@@ -42,9 +42,7 @@ public class ChatClCommand implements CommandExecutor {
                 + ChatColor.GRAY + player.getName() + ": "
                 + ChatColor.WHITE + message;
 
-        // Рассылаем сообщение только тем, у кого включён clanChatToggle (т. е. находится в clanChatToggles)
-        // Но у нас списка toggle нет в pdm — этот список можно перенести в pdm, либо хранить локально (например, static).
-        // Предположим, что pdm хранит также List<String> clanChatToggles:
+        // Рассылаем сообщение только тем, у кого включён clanChatToggle
         for (Player p : Bukkit.getOnlinePlayers()) {
             String pClan = pdm.getPlayerClan(p.getName());
             if (clan.equals(pClan) && pdm.isClanChatToggled(p.getName())) {

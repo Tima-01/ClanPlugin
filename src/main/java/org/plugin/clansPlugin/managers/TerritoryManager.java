@@ -285,10 +285,8 @@ public class TerritoryManager {
                 }
             }
         }
-
         return false;
     }
-
     private boolean isAdjacent(int[] territory1, int minX, int minZ, int maxX, int maxZ) {
         // Проверяем, что территории соприкасаются хотя бы одной стороной
         return (maxX == territory1[0] - 1 || minX == territory1[2] + 1 ||
