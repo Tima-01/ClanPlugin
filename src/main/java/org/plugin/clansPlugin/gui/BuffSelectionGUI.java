@@ -10,7 +10,8 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.plugin.clansPlugin.buffs.ClanBuff;
 import org.plugin.clansPlugin.managers.ClanBuffManager;
 
-import java.util.Arrays;
+import java.util.ArrayList;
+import java.util.List;
 
 public class BuffSelectionGUI {
 
@@ -42,13 +43,16 @@ public class BuffSelectionGUI {
                 meta.setDisplayName(ChatColor.GREEN + buff.getDisplayName());
                 meta.setCustomModelData(CUSTOM_MODEL_DATA);
 
-                meta.setLore(Arrays.asList(
-                        ChatColor.GRAY + "Основной: " + ChatColor.WHITE +
-                                buff.getPrimaryEffect().getName() + " " + (buff.getPrimaryAmplifier() + 1),
-                        ChatColor.GRAY + "Дополнительный: " + ChatColor.WHITE +
-                                buff.getSecondaryEffect().getName() + " " + (buff.getSecondaryAmplifier() + 1)
-                ));
+                // Разбиваем описание на строки по \n
+                String[] descLines = buff.getDescription().split("\n");
+                List<String> lore = new ArrayList<>();
 
+                // Добавляем все строки описания
+                for (String line : descLines) {
+                    lore.add(ChatColor.translateAlternateColorCodes('&', line));
+                }
+
+                meta.setLore(lore);
                 item.setItemMeta(meta);
             }
 

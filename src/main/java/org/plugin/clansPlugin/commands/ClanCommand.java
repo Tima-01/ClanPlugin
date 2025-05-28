@@ -35,7 +35,16 @@ public class ClanCommand implements CommandExecutor {
         this.voteManager = plugin.getVoteManager();
 
     }
-
+    private DyeColor getClanBannerColor(String clanName) {
+        return switch (clanName.toLowerCase()) {
+            case "бугу" -> DyeColor.RED;
+            case "саруу" -> DyeColor.GREEN;
+            case "кыпчак" -> DyeColor.BLUE;
+            case "саяк" -> DyeColor.YELLOW;
+            case "сарыбагыш" -> DyeColor.PURPLE;
+            default -> DyeColor.WHITE;
+        };
+    }
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (!(sender instanceof Player player)) {
@@ -368,30 +377,18 @@ public class ClanCommand implements CommandExecutor {
                         }
 
                         if (territoryManager.addFlagTerritory(clanName, flagLocation)) {
-                            player.sendMessage(ChatColor.GREEN + "Флаг успешно установлен! Создана новая территория 3x3 чанка.");
-
-                            // Визуализация флага
-                            flagLocation.getBlock().setType(Material.BLUE_BANNER);
-                            Block banner = flagLocation.getBlock();
-                            Banner bannerData = (Banner) banner.getState();
-                            bannerData.setBaseColor(DyeColor.BLUE);
-                            bannerData.update(true);
-
-                            // Установка столба под флагом
-                            for (int i = 1; i <= 2; i++) {
-                                flagLocation.clone().subtract(0, i, 0).getBlock().setType(Material.OAK_FENCE);
-                            }
+                            player.sendMessage(ChatColor.GREEN + "Флаг успешно установлен!");
 
                             // Эффекты
                             player.getWorld().playSound(flagLocation, Sound.ENTITY_PLAYER_LEVELUP, 1.0f, 1.0f);
-                            player.getWorld().spawnParticle(Particle.HAPPY_VILLAGER, flagLocation.add(0.5, 1.5, 0.5), 30, 0.5, 0.5, 0.5, 0.1);
+                            player.getWorld().spawnParticle(Particle.HAPPY_VILLAGER,
+                                    flagLocation.add(0.5, 1.5, 0.5), 30, 0.5, 0.5, 0.5, 0.1);
                         } else {
-                            player.sendMessage(ChatColor.RED + "Невозможно установить флаг здесь. Причины:");
-                            player.sendMessage(ChatColor.RED + "- Точка не примыкает к вашей территории");
-                            player.sendMessage(ChatColor.RED + "- Точка пересекается с территорией другого клана");
+                            player.sendMessage(ChatColor.RED + "Невозможно установить флаг здесь.");
                         }
                         return true;
                     }
+
                     case "removeflag" -> {
                         String clanName = pdm.getPlayerClan(player.getName());
                         if (clanName == null) {
@@ -405,20 +402,16 @@ public class ClanCommand implements CommandExecutor {
                             return true;
                         }
 
-                        // Проверяем, смотрит ли игрок на флаг
                         Block targetBlock = player.getTargetBlockExact(5);
-                        if (targetBlock == null || !(targetBlock.getType().toString().endsWith("_BANNER"))) {
+                        if (targetBlock == null || !(targetBlock.getState() instanceof Banner)) {
                             player.sendMessage(ChatColor.RED + "Посмотрите на флаг, который хотите удалить.");
                             return true;
                         }
 
-                        Location flagLocation = targetBlock.getLocation();
-                        if (territoryManager.removeClanFlag(flagLocation)) {
-                            // Удаляем только сам флаг (столб не обязателен)
-                            targetBlock.setType(Material.AIR);
+                        if (territoryManager.removeClanFlag(targetBlock.getLocation())) {
                             player.sendMessage(ChatColor.GREEN + "Флаг успешно удален!");
                         } else {
-                            player.sendMessage(ChatColor.RED + "Это не флаг вашего клана или произошла ошибка.");
+                            player.sendMessage(ChatColor.RED + "Это не флаг вашего клана!");
                         }
                         return true;
                     }
@@ -503,5 +496,6 @@ public class ClanCommand implements CommandExecutor {
         player.sendMessage(ChatColor.RED + "Использование: /clan <info|leave|chat|help>");
         return true;
     }
+
 }
 
