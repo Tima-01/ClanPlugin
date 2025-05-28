@@ -329,6 +329,9 @@ public class ClanCommand implements CommandExecutor {
                         pdm.savePlayerData();
                         return true;
                     }
+                    /*
+                    * Это case для баффов
+                    * */
                     case "setbuff" -> {
                         String clanName = pdm.getPlayerClan(player.getName());
 
@@ -349,7 +352,9 @@ public class ClanCommand implements CommandExecutor {
 
                         return true;
                     }
-
+                    /*
+                     * Это case для создания флагов
+                     * */
                     case "createflag" -> {
                         String clanName = pdm.getPlayerClan(player.getName());
                         if (clanName == null) {
@@ -377,18 +382,21 @@ public class ClanCommand implements CommandExecutor {
                         }
 
                         if (territoryManager.addFlagTerritory(clanName, flagLocation)) {
-                            player.sendMessage(ChatColor.GREEN + "Флаг успешно установлен!");
+                            player.sendMessage(ChatColor.GREEN + "Флаг успешно установлен! Создана новая территория 3x3 чанка.");
 
                             // Эффекты
                             player.getWorld().playSound(flagLocation, Sound.ENTITY_PLAYER_LEVELUP, 1.0f, 1.0f);
-                            player.getWorld().spawnParticle(Particle.HAPPY_VILLAGER,
-                                    flagLocation.add(0.5, 1.5, 0.5), 30, 0.5, 0.5, 0.5, 0.1);
+                            player.getWorld().spawnParticle(Particle.HAPPY_VILLAGER, flagLocation.add(0.5, 1.5, 0.5), 30, 0.5, 0.5, 0.5, 0.1);
                         } else {
-                            player.sendMessage(ChatColor.RED + "Невозможно установить флаг здесь.");
+                            player.sendMessage(ChatColor.RED + "Невозможно установить флаг здесь. Причины:");
+                            player.sendMessage(ChatColor.RED + "- Точка не примыкает к вашей территории");
+                            player.sendMessage(ChatColor.RED + "- Точка пересекается с территорией другого клана");
                         }
                         return true;
                     }
-
+                    /*
+                     * Это case для удаления флагов
+                     * */
                     case "removeflag" -> {
                         String clanName = pdm.getPlayerClan(player.getName());
                         if (clanName == null) {
@@ -411,10 +419,13 @@ public class ClanCommand implements CommandExecutor {
                         if (territoryManager.removeClanFlag(targetBlock.getLocation())) {
                             player.sendMessage(ChatColor.GREEN + "Флаг успешно удален!");
                         } else {
-                            player.sendMessage(ChatColor.RED + "Это не флаг вашего клана!");
+                            player.sendMessage(ChatColor.RED + "Это не флаг вашего клана или произошла ошибка.");
                         }
                         return true;
                     }
+                    /*
+                     * Это case проверки всей территории (включая флаги)
+                     * */
                     case "territories" -> {
                         String clanName = pdm.getPlayerClan(player.getName());
                         if (clanName == null) {
