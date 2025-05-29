@@ -1,8 +1,6 @@
 package org.plugin.clansPlugin.managers;
 
 import org.bukkit.*;
-import org.bukkit.block.Banner;
-import org.bukkit.block.Block;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.ArmorStand;
@@ -17,8 +15,7 @@ import java.util.UUID;
 
 public class TerritoryManager {
 
-    private static final int FLAG_MAX_HEALTH = 100;
-    private static final double ARMOR_STAND_OFFSET = 0.5;
+    private static final int FLAG_MAX_HEALTH = 200;
 
     private final ClansPlugin plugin;
     private File territoryFile;
@@ -284,15 +281,6 @@ public class TerritoryManager {
 
         // Убедимся, что координаты блока целочисленные
         Location blockCenter = location.getBlock().getLocation().add(0.5, 0, 0.5);
-
-        // Устанавливаем баннер
-//        Block block = blockCenter.getBlock();
-//        block.setType(Material.valueOf(color.name() + "_BANNER"));
-//
-//        // Настраиваем баннер
-//        Banner banner = (Banner) block.getState();
-//        banner.setBaseColor(color);
-//        banner.update(true);
 
         // Создаем ArmorStand для отображения здоровья
         Location armorStandLoc = blockCenter.clone().add(0, 0, 0);

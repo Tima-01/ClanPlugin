@@ -20,7 +20,7 @@ public class SubCommandTerritories implements SubCommand {
 
     @Override
     public String[] getAliases() {
-        return new String[]{"territories"};
+        return new String[]{"territories", "terr"};
     }
 
     @Override
@@ -30,7 +30,7 @@ public class SubCommandTerritories implements SubCommand {
 
     @Override
     public String getDescription() {
-        return "Показать всю территорию клана (основная + флаги)";
+        return "Показать всю территорию клана (основная + флаги) в обычных координатах";
     }
 
     @Override
@@ -52,7 +52,8 @@ public class SubCommandTerritories implements SubCommand {
         // Основная территория
         int[] mainTerritory = territoryManager.getClanTerritory(clanName);
         if (mainTerritory != null) {
-            player.sendMessage(ChatColor.YELLOW + "Основная база: " + ChatColor.WHITE + Arrays.toString(mainTerritory));
+            String formatted = formatTerritory(mainTerritory);
+            player.sendMessage(ChatColor.YELLOW + "Основная база: " + ChatColor.WHITE + formatted);
         }
 
         // Все территории (включая флаги)
@@ -65,7 +66,8 @@ public class SubCommandTerritories implements SubCommand {
         if (!allTerritories.isEmpty()) {
             player.sendMessage(ChatColor.YELLOW + "Территории флагов:");
             for (int[] territory : allTerritories) {
-                player.sendMessage(ChatColor.GRAY + "- " + Arrays.toString(territory));
+                String formatted = formatTerritory(territory);
+                player.sendMessage(ChatColor.GRAY + "- " + formatted);
             }
         } else if (mainTerritory == null) {
             player.sendMessage(ChatColor.YELLOW + "У клана нет ещё ни одной территории.");
@@ -74,5 +76,17 @@ public class SubCommandTerritories implements SubCommand {
         }
 
         return true;
+    }
+
+    private String formatTerritory(int[] territory) {
+        // Предполагаем формат территории: [x1, z1, x2, z2, world, centerX, centerY, centerZ, radius]
+        if (territory.length >= 9) {
+            int centerX = territory[5];
+            int centerY = territory[6];
+            int centerZ = territory[7];
+            return String.format("Центр: %d, %d, %d", centerX, centerY, centerZ);
+        }
+        // Если формат другой, вернем как есть
+        return Arrays.toString(territory);
     }
 }
