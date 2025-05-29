@@ -10,6 +10,7 @@ import org.bukkit.inventory.ItemStack;
 import org.plugin.clansPlugin.ClansPlugin;
 import org.plugin.clansPlugin.buffs.ClanBuff;
 import org.plugin.clansPlugin.managers.PlayerDataManager;
+import org.plugin.clansPlugin.managers.TerritoryAdjuster;
 
 import java.util.Arrays;
 import java.util.List;
@@ -67,6 +68,11 @@ public class InventoryClickListener implements Listener {
             // Вступаем в новый клан
             pdm.setPlayerClan(player.getName(), clan);
             pdm.savePlayerData();
+
+            // Пересчёт территории после вступления
+            TerritoryAdjuster adjuster = new TerritoryAdjuster(plugin.getPlayerDataManager(), plugin.getTerritoryManager());
+            adjuster.adjustTerritory(clan);
+
             player.sendMessage(ChatColor.GREEN + "Ты вступил в клан: " + clan);
             player.closeInventory();
             return;
