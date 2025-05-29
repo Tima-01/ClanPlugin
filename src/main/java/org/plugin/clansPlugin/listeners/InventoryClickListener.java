@@ -1,5 +1,6 @@
 package org.plugin.clansPlugin.listeners;
 
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
@@ -64,7 +65,6 @@ public class InventoryClickListener implements Listener {
                     plugin.getTerritoryManager().deleteClanTerritory(currentClan);
                 }
             }
-
             // Вступаем в новый клан
             pdm.setPlayerClan(player.getName(), clan);
             pdm.savePlayerData();
@@ -73,6 +73,25 @@ public class InventoryClickListener implements Listener {
             TerritoryAdjuster adjuster = new TerritoryAdjuster(plugin.getPlayerDataManager(), plugin.getTerritoryManager());
             adjuster.adjustTerritory(clan);
 
+            // Сообщение в клановый чат
+            String joinMessage = ChatColor.AQUA + "Игрок " + player.getName() + " вступил в клан.";
+            for (String memberName : pdm.getClanMembers(clan)) {
+                Player member = Bukkit.getPlayerExact(memberName);
+                if (member != null && member.isOnline()) {
+                    member.sendMessage(joinMessage);
+                }
+            }
+
+            // Сообщение лидеру
+            String leaderName = pdm.getClanLeader(clan);
+            if (leaderName != null) {
+                Player leader = Bukkit.getPlayerExact(leaderName);
+                if (leader != null && leader.isOnline()) {
+                    leader.sendMessage(ChatColor.GREEN + "Игрок " + player.getName() + " вступил в клан. Территория расширена.");
+                }
+            }
+
+// Сообщение самому игроку
             player.sendMessage(ChatColor.GREEN + "Ты вступил в клан: " + clan);
             player.closeInventory();
             return;
