@@ -30,7 +30,7 @@ public enum ClanBuff {
     ),
     HORSE(
             "Дух коня",
-            ChatColor.WHITE + "Скорость и сила прыжка",
+            ChatColor.WHITE + "Скорость и жизненная сила",
             PotionEffectType.SPEED, 1,
             PotionEffectType.ABSORPTION, 1
     );

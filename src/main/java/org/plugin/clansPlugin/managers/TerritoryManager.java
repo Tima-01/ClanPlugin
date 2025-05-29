@@ -201,8 +201,21 @@ public class TerritoryManager {
         int flagMaxX = flagChunkX + 1;
         int flagMaxZ = flagChunkZ + 1;
 
-        // Проверяем пересечение с чужими территориями
+        // 1. Проверяем, что территория флага соприкасается или пересекается с территорией клана
+        boolean onOrNearOwnTerritory = isOnOrAdjacentToOwnTerritory(clanName, flagMinX, flagMinZ, flagMaxX, flagMaxZ);
+        if (!onOrNearOwnTerritory) {
+            return false;
+        }
+
+        // 2. Проверяем пересечение только с территориями других кланов
         if (isOverlappingWithOtherClans(clanName, flagMinX, flagMinZ, flagMaxX, flagMaxZ)) {
+            return false;
+        }
+
+        // 3. Проверяем блок под флагом
+        Location obsidianLoc = flagLocation.clone().subtract(0, 1, 0);
+        Material belowType = obsidianLoc.getBlock().getType();
+        if (!(belowType.isSolid() || belowType == Material.AIR || belowType == Material.WATER || belowType == Material.LAVA)) {
             return false;
         }
 
@@ -229,6 +242,21 @@ public class TerritoryManager {
         saveTerritoryData();
 
         return true;
+    }
+
+    private boolean isOnOrAdjacentToOwnTerritory(String clanName, int flagMinX, int flagMinZ, int flagMaxX, int flagMaxZ) {
+        List<int[]> territories = getAllClanTerritories(clanName);
+
+        for (int[] territory : territories) {
+            // Проверяем, пересекается или соприкасается территория флага с существующей территорией
+            boolean xOverlap = (flagMinX <= territory[2] + 1) && (flagMaxX >= territory[0] - 1);
+            boolean zOverlap = (flagMinZ <= territory[3] + 1) && (flagMaxZ >= territory[1] - 1);
+
+            if (xOverlap && zOverlap) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private boolean isOverlappingWithOtherClans(String clanName, int minX, int minZ, int maxX, int maxZ) {
@@ -282,6 +310,10 @@ public class TerritoryManager {
         // Убедимся, что координаты блока целочисленные
         Location blockCenter = location.getBlock().getLocation().add(0.5, 0, 0.5);
 
+        // Создаем обсидиановый блок под флагом
+        Location obsidianLoc = blockCenter.clone().subtract(0, 1, 0);
+        obsidianLoc.getBlock().setType(Material.OBSIDIAN);
+
         // Создаем ArmorStand для отображения здоровья
         Location armorStandLoc = blockCenter.clone().add(0, 0, 0);
         ArmorStand armorStand = blockCenter.getWorld().spawn(armorStandLoc, ArmorStand.class);
@@ -299,7 +331,7 @@ public class TerritoryManager {
 
     private String getHealthDisplay(String clanName, int health) {
         ChatColor color = health > 50 ? ChatColor.GREEN : health > 20 ? ChatColor.YELLOW : ChatColor.RED;
-        return ChatColor.WHITE + "Флаг " + clanName + " " +
+        return "Флаг " + clanName + " " +
                 ChatColor.GRAY + "[" + color + health + "❤" + ChatColor.GRAY + "]";
     }
 
@@ -319,7 +351,6 @@ public class TerritoryManager {
                     int x = Integer.parseInt(data[5]);
                     int y = Integer.parseInt(data[6]);
                     int z = Integer.parseInt(data[7]);
-
                     if (x == location.getBlockX() &&
                             y == location.getBlockY() &&
                             z == location.getBlockZ()) {
@@ -392,7 +423,6 @@ public class TerritoryManager {
             saveTerritoryData();
 
             updateFlagHealthDisplay(clanOwner, flagId, newHealth);
-            damager.sendMessage(ChatColor.YELLOW + "Вы повредили флаг! Осталось здоровья: " + newHealth + "/" + FLAG_MAX_HEALTH);
             return true;
         }
     }
@@ -408,8 +438,8 @@ public class TerritoryManager {
             Bukkit.getScheduler().runTask(plugin, () -> {
                 ArmorStand armorStand = (ArmorStand) Bukkit.getEntity(armorStandId);
                 if (armorStand != null && armorStand.isValid()) {
-                    String healthText = (health > 50 ? "§a" : health > 20 ? "§e" : "§c") + health + "❤";
-                    armorStand.setCustomName("&fФлаг " + clanName + " §7[" + healthText + "§7]");
+                    String healthText = (health > 50 ? ChatColor.GREEN.toString() : health > 20 ? ChatColor.YELLOW.toString() : ChatColor.RED.toString()) + health + "❤";
+                    armorStand.setCustomName("Флаг " + clanName + " " + ChatColor.GRAY + "[" + healthText + ChatColor.GRAY + "]");
                 }
             });
         }
@@ -434,16 +464,21 @@ public class TerritoryManager {
         }
 
         if (data.length >= 8) {
-            // Удаляем баннер
+            // Удаляем баннер и обсидиановый блок под ним
             World world = Bukkit.getWorld(data[4]);
             if (world != null) {
-                Location loc = new Location(
+                // Удаляем баннер
+                Location bannerLoc = new Location(
                         world,
                         Integer.parseInt(data[5]),
                         Integer.parseInt(data[6]),
                         Integer.parseInt(data[7])
                 );
-                loc.getBlock().setType(Material.AIR);
+                bannerLoc.getBlock().setType(Material.AIR);
+
+                // Удаляем обсидиановый блок под баннером
+                Location obsidianLoc = bannerLoc.clone().subtract(0, 1, 0);
+                obsidianLoc.getBlock().setType(Material.AIR);
             }
         }
     }
@@ -526,5 +561,36 @@ public class TerritoryManager {
         // Удаляем всю секцию флагов клана
         territoryData.set("flags." + clanName, null);
         saveTerritoryData();
+    }
+
+    public int getFlagHealth(Location flagLocation) {
+        if (!territoryData.contains("flags")) {
+            return -1;
+        }
+
+        for (String clanName : territoryData.getConfigurationSection("flags").getKeys(false)) {
+            ConfigurationSection clanFlags = territoryData.getConfigurationSection("flags." + clanName);
+            for (String flagId : clanFlags.getKeys(false)) {
+                String flagData = territoryData.getString("flags." + clanName + "." + flagId);
+                if (flagData == null) continue;
+
+                String[] data = flagData.split(",");
+                if (data.length >= 9) { // Проверяем наличие данных о здоровье
+                    int x = Integer.parseInt(data[5]);
+                    int y = Integer.parseInt(data[6]);
+                    int z = Integer.parseInt(data[7]);
+
+                    if (x == flagLocation.getBlockX() &&
+                            y == flagLocation.getBlockY() &&
+                            z == flagLocation.getBlockZ()) {
+                        return Integer.parseInt(data[8]); // Возвращаем текущее здоровье
+                    }
+                }
+            }
+        }
+        return -1;
+    }
+    public static int getFlagMaxHealth() {
+        return FLAG_MAX_HEALTH;
     }
 }

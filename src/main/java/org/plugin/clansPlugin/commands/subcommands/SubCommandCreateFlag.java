@@ -60,9 +60,10 @@ public class SubCommandCreateFlag implements SubCommand {
         }
 
         Location flagLocation = player.getLocation();
-        // Проверяем, что блок под ногами подходит для установки флага
-        if (!flagLocation.getBlock().getRelative(BlockFace.DOWN).getType().isSolid()) {
-            player.sendMessage(ChatColor.RED + "Флаг можно установить только на твердую поверхность.");
+        // Более мягкая проверка блока под флагом
+        Block below = flagLocation.getBlock().getRelative(BlockFace.DOWN);
+        if (!below.getType().isSolid() || below.getType() == Material.WATER || below.getType() == Material.LAVA) {
+            player.sendMessage(ChatColor.RED + "Флаг можно установить только на твердую поверхность (не воду/лаву).");
             return true;
         }
 
@@ -85,9 +86,20 @@ public class SubCommandCreateFlag implements SubCommand {
                     30, 0.5, 0.5, 0.5, 0.1
             );
         } else {
-            player.sendMessage(ChatColor.RED + "Невозможно установить флаг здесь. Возможные причины:");
-            player.sendMessage(ChatColor.RED + "- Точка не примыкает к вашей территории");
-            player.sendMessage(ChatColor.RED + "- Точка пересекается с территорией другого клана");
+            // Более информативное сообщение об ошибке
+            String clanAtLocation = territoryManager.getClanByChunk(
+                    flagLocation.getBlockX() >> 4,
+                    flagLocation.getBlockZ() >> 4
+            );
+
+            if (clanAtLocation != null && !clanAtLocation.equals(clanName)) {
+                player.sendMessage(ChatColor.RED + "Эта территория уже принадлежит клану " + clanAtLocation);
+            } else {
+                player.sendMessage(ChatColor.RED + "Невозможно установить флаг здесь. Возможные причины:");
+                player.sendMessage(ChatColor.RED + "- Точка не примыкает к вашей территории");
+                player.sendMessage(ChatColor.RED + "- Точка пересекается с территорией другого клана");
+                player.sendMessage(ChatColor.RED + "- Недостаточно места для установки флага");
+            }
         }
         return true;
     }
