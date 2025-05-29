@@ -27,19 +27,21 @@ public class PlayerMoveListener implements Listener {
 
     @EventHandler
     public void onPlayerMove(PlayerMoveEvent event) {
+        Location from = event.getFrom();
+        Location to = event.getTo();
+
+        if (to == null || from.getChunk().equals(to.getChunk())) {
+            return; // игрок остался в том же чанке
+        }
+
         Player player = event.getPlayer();
-        Location loc = player.getLocation();
-        int chunkX = loc.getChunk().getX();
-        int chunkZ = loc.getChunk().getZ();
+        int chunkX = to.getChunk().getX();
+        int chunkZ = to.getChunk().getZ();
 
-        TerritoryManager tm = plugin.getTerritoryManager();
-
-        String clanHere = tm.getClanByChunk(chunkX, chunkZ);
+        TerritoryManager territoryManager = plugin.getTerritoryManager();
+        String clanHere = territoryManager.getClanByChunk(chunkX, chunkZ);
         String lastClan = playerCurrentClan.get(player.getName());
 
-        String playerClan = plugin.getPlayerDataManager().getPlayerClan(player.getName());
-
-        // Игрок зашел на новый клан
         if (clanHere != null && !clanHere.equals(lastClan)) {
             player.sendTitle(
                     ChatColor.GREEN + "Вы вошли на территорию клана",
@@ -56,7 +58,7 @@ public class PlayerMoveListener implements Listener {
             playerCurrentClan.remove(player.getName());
         }
 
-        // Применение/снятие баффов
+        String playerClan = plugin.getPlayerDataManager().getPlayerClan(player.getName());
         if (playerClan == null) return;
 
         ClanBuff buff = plugin.getClanBuffManager().getBuff(playerClan);
@@ -65,11 +67,12 @@ public class PlayerMoveListener implements Listener {
         boolean onOwnTerritory = clanHere != null && clanHere.equalsIgnoreCase(playerClan);
         // Основной эффект
         toggleEffect(player, buff.getPrimaryEffect(), buff.getPrimaryAmplifier(), onOwnTerritory);
-        // Вторичный эффект (добавлено)
+        // Вторичный эффект
         if (buff.getSecondaryEffect() != null) {
             toggleEffect(player, buff.getSecondaryEffect(), buff.getSecondaryAmplifier(), onOwnTerritory);
         }
     }
+
     private void toggleEffect(Player player, PotionEffectType type, int amplifier, boolean apply) {
         if (apply) {
             player.addPotionEffect(new PotionEffect(type, PotionEffect.INFINITE_DURATION, amplifier, false, false));

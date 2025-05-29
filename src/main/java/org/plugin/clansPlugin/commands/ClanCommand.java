@@ -51,7 +51,7 @@ public class ClanCommand implements CommandExecutor {
         register(new SubCommandTerritories(pdm, tm));
 
         // /clan help
-        register(new SubCommandHelp(subCommands));
+        register(new SubCommandHelp());
     }
 
     private void register(SubCommand cmd) {
