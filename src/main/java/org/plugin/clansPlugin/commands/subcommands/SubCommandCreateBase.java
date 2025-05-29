@@ -60,7 +60,7 @@ public class SubCommandCreateBase implements SubCommand {
         Location basePoint = new Location(player.getWorld(), 1340, 68, 300);
         Location loc = player.getLocation();
         if (loc.distance(basePoint) < 1000) {
-            player.sendMessage(ChatColor.RED + "База должна быть не ближе 1000 блоков от точки (1340,68,300).");
+            player.sendMessage(ChatColor.RED + "База должна быть не ближе 1000 блоков от спавна.");
             return true;
         }
 

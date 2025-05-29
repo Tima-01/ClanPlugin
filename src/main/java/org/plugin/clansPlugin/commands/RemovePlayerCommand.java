@@ -8,6 +8,7 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.plugin.clansPlugin.managers.PlayerDataManager;
+import org.plugin.clansPlugin.managers.TerritoryAdjuster;
 import org.plugin.clansPlugin.managers.TerritoryManager;
 
 public class RemovePlayerCommand implements CommandExecutor {
@@ -87,21 +88,8 @@ public class RemovePlayerCommand implements CommandExecutor {
         }
 
         // === СЖАТИЕ (уменьшение) ТЕРРИТОРИИ ПОСЛЕ ИСКЛЮЧЕНИЯ ===
-        int updatedSize = playerDataManager.getClanMembers(targetClan).size();
-        if (updatedSize > 0) {
-            int newTerritorySize = Math.max(4, (int) Math.sqrt(updatedSize * 2) + 2);
-            int[] currentTerritory = territoryManager.getClanTerritory(targetClan);
-            if (currentTerritory != null && targetPlayer != null) {
-                int centerX = (currentTerritory[0] + currentTerritory[2]) / 2;
-                int centerZ = (currentTerritory[1] + currentTerritory[3]) / 2;
-                Location center = new Location(targetPlayer.getWorld(), centerX << 4, 0, centerZ << 4);
-                territoryManager.deleteClanTerritory(targetClan);
-                territoryManager.createSquareTerritory(targetClan, center, newTerritorySize);
-            }
-        } else {
-            // Если в клане не осталось участников, полностью удаляем территорию
-            territoryManager.deleteClanTerritory(targetClan);
-        }
+        TerritoryAdjuster adjuster = new TerritoryAdjuster(playerDataManager, territoryManager);
+        adjuster.adjustTerritory(targetClan);
 
         return true;
     }

@@ -7,10 +7,11 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.plugin.clansPlugin.ClansPlugin;
 import org.plugin.clansPlugin.commands.subcommands.*;
-import org.plugin.clansPlugin.gui.BuffSelectionGUI;
 import org.plugin.clansPlugin.managers.PlayerDataManager;
 import org.plugin.clansPlugin.managers.TerritoryManager;
 import org.plugin.clansPlugin.managers.VoteManager;
+import org.plugin.clansPlugin.gui.BuffSelectionGUI;
+import org.plugin.clansPlugin.managers.ClanBuffManager;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -27,7 +28,7 @@ public class ClanCommand implements CommandExecutor {
         PlayerDataManager pdm = plugin.getPlayerDataManager();
         TerritoryManager tm = plugin.getTerritoryManager();
         VoteManager vm = plugin.getVoteManager();
-
+        ClanBuffManager cbm = plugin.getClanBuffManager(); // менеджер баффов
 
         // Регистрируем все SubCommand
         register(new SubCommandInfo(pdm, tm));
@@ -35,14 +36,21 @@ public class ClanCommand implements CommandExecutor {
         register(new SubCommandLeave(pdm, tm));
         register(new SubCommandReload(plugin));
         register(new SubCommandChatToggle(pdm));
-        // BuffSelectionGUI нужно создать и передать свой экземпляр
-        register(new SubCommandSetBuff(pdm, plugin));
+
+        // /clan setbuff
+        register(new SubCommandSetBuff(pdm, plugin)); // внутри SubCommandSetBuff используется plugin.getClanBuffManager()
+
+        // Базовые подкоманды по территории
         register(new SubCommandCreateBase(pdm, tm));
         register(new SubCommandDeleteBase(pdm, tm));
         register(new SubCommandSetLeader(pdm));
+
+        // Флаги
         register(new SubCommandCreateFlag(pdm, tm));
         register(new SubCommandRemoveFlag(pdm, tm));
         register(new SubCommandTerritories(pdm, tm));
+
+        // /clan help
         register(new SubCommandHelp(subCommands));
     }
 

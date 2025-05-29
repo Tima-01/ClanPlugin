@@ -40,6 +40,13 @@ public class ClanAdminCommand implements CommandExecutor {
             sender.sendMessage(ChatColor.YELLOW + "/clanadmin bases - список баз с координатами");
             sender.sendMessage(ChatColor.YELLOW + "/clanadmin tpbase <клан> - телепорт к базе");
             sender.sendMessage(ChatColor.YELLOW + "/clanadmin deletebase <клан> - удалить базу клана");
+            sender.sendMessage(ChatColor.YELLOW + "/clan reload" + ChatColor.WHITE + " - Перезагрузка конфигов");
+            sender.sendMessage(ChatColor.YELLOW + "/endtvote <клан>" + ChatColor.WHITE + " - Досрочное успешное завершение голосования");
+            sender.sendMessage(ChatColor.YELLOW + "/startvote <клан>" + ChatColor.WHITE + " - Начать голосование за нового лидера");
+            sender.sendMessage(ChatColor.YELLOW + "/clan removeleader <клан>" + ChatColor.WHITE + " - Удалить лидера у клана");
+            sender.sendMessage(ChatColor.YELLOW + "/clan setleader <игрок>" + ChatColor.WHITE + " - Назначить лидера клана");
+            sender.sendMessage(ChatColor.YELLOW + "/addplayer <игрок> <клан>" + ChatColor.WHITE + " - Добавить участника в клан");
+            sender.sendMessage(ChatColor.YELLOW + "/removeplayer <игрок>" + ChatColor.WHITE + " - Удалить участника из клана");
             return true;
         }
 

@@ -9,7 +9,8 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.plugin.clansPlugin.ClansPlugin;
 import org.plugin.clansPlugin.managers.ClanManager;
 import org.plugin.clansPlugin.managers.PlayerDataManager;
-
+import org.plugin.clansPlugin.managers.TerritoryAdjuster;
+import org.plugin.clansPlugin.managers.TerritoryManager;
 import java.util.List;
 
 public class SubCommandJoin implements SubCommand {
@@ -17,11 +18,13 @@ public class SubCommandJoin implements SubCommand {
     private final ClansPlugin plugin;
     private final ClanManager clanManager;
     private final PlayerDataManager pdm;
+    private final TerritoryManager territoryManager;
 
     public SubCommandJoin(ClansPlugin plugin) {
         this.plugin = plugin;
         this.clanManager = plugin.getClanManager();
         this.pdm = plugin.getPlayerDataManager();
+        this.territoryManager = plugin.getTerritoryManager();
     }
 
     @Override

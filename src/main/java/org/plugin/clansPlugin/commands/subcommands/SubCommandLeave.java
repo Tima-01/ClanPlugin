@@ -4,6 +4,7 @@ import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.plugin.clansPlugin.managers.PlayerDataManager;
+import org.plugin.clansPlugin.managers.TerritoryAdjuster;
 import org.plugin.clansPlugin.managers.TerritoryManager;
 
 import java.util.List;
@@ -58,23 +59,10 @@ public class SubCommandLeave implements SubCommand {
 
         // Пересчёт территории
         List<String> members = pdm.getClanMembers(clanName);
-        if (members.isEmpty()) {
-            // Если никого не осталось, удаляем территорию
-            territoryManager.deleteClanTerritory(clanName);
-            player.sendMessage(ChatColor.YELLOW + "Ты покинул клан. Клан был расформирован.");
-        } else {
-            int updatedSize = members.size();
-            int newTerritorySize = Math.max(4, (int) Math.sqrt(updatedSize * 2) + 2);
-            int[] currentTerritory = territoryManager.getClanTerritory(clanName);
-            if (currentTerritory != null) {
-                int centerX = (currentTerritory[0] + currentTerritory[2]) / 2;
-                int centerZ = (currentTerritory[1] + currentTerritory[3]) / 2;
-                Location center = new Location(player.getWorld(), centerX << 4, 0, centerZ << 4);
-                territoryManager.deleteClanTerritory(clanName);
-                territoryManager.createSquareTerritory(clanName, center, newTerritorySize);
-            }
-            player.sendMessage(ChatColor.YELLOW + "Ты покинул клан.");
-        }
+        TerritoryAdjuster adjuster = new TerritoryAdjuster(pdm, territoryManager);
+        adjuster.adjustTerritory(clanName);
+
+        player.sendMessage(ChatColor.YELLOW + "Ты покинул клан.");
 
         pdm.savePlayerData();
         return true;
