@@ -35,7 +35,9 @@ public class SubCommandChatToggle implements SubCommand {
         }
 
         String playerName = player.getName();
-        if (!pdm.isPlayerInClan(playerName)) {
+
+        // Администраторы могут включать чат, даже если не в клане
+        if (!pdm.isPlayerInClan(playerName) && !player.hasPermission("clan.admin")) {
             player.sendMessage(ChatColor.RED + "Ты не состоишь в клане.");
             return true;
         }
