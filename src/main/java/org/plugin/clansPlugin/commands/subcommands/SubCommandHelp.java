@@ -31,6 +31,7 @@ public class SubCommandHelp implements SubCommand {
 
         player.sendMessage(ChatColor.GOLD + "=====[ Команды клана ]=====");
         player.sendMessage(ChatColor.YELLOW + "/clan info" + ChatColor.WHITE + " - Информация о твоем клане");
+        player.sendMessage(ChatColor.YELLOW + "/clan tpbase" + ChatColor.WHITE + " - Телепорт на базу клана");
         player.sendMessage(ChatColor.YELLOW + "/clan leave" + ChatColor.WHITE + " - Покинуть клан");
         player.sendMessage(ChatColor.YELLOW + "/clan help" + ChatColor.WHITE + " - Показать это сообщение");
         player.sendMessage(ChatColor.YELLOW + "/clan join" + ChatColor.WHITE + " - Выбрать и вступить в клан");

@@ -44,6 +44,7 @@ public class ClanCommand implements CommandExecutor {
         register(new SubCommandCreateBase(pdm, tm));
         register(new SubCommandDeleteBase(pdm, tm));
         register(new SubCommandSetLeader(pdm));
+        register(new SubCommandTpBase(pdm, tm));
 
         // Флаги
         register(new SubCommandCreateFlag(pdm, tm));
