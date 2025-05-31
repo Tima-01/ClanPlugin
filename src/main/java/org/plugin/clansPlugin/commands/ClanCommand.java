@@ -52,7 +52,6 @@ public class ClanCommand implements CommandExecutor {
 
         // /clan help
         register(new SubCommandHelp());
-
     }
 
     private void register(SubCommand cmd) {

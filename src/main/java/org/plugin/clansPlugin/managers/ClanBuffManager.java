@@ -2,11 +2,13 @@ package org.plugin.clansPlugin.managers;
 
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
-import org.bukkit.potion.PotionEffect;
 import org.plugin.clansPlugin.ClansPlugin;
 import org.plugin.clansPlugin.buffs.ClanBuff;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class ClanBuffManager {
     private final ClansPlugin plugin;
