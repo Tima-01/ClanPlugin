@@ -66,7 +66,7 @@ public class BuffSelectionGUI {
             case ARKHAR: return Material.GOAT_HORN;
             case SNOW_LEOPARD: return Material.TROPICAL_FISH;
             case EAGLE: return Material.FEATHER;
-            case HORSE: return Material.APPLE;
+            case HORSE: return Material.GOLDEN_APPLE;
             default: return Material.BONE;
         }
     }

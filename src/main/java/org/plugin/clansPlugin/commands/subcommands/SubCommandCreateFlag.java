@@ -8,15 +8,21 @@ import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Player;
 import org.plugin.clansPlugin.managers.PlayerDataManager;
 import org.plugin.clansPlugin.managers.TerritoryManager;
+import net.milkbowl.vault.economy.Economy;
+import org.bukkit.plugin.RegisteredServiceProvider;
 
 public class SubCommandCreateFlag implements SubCommand {
 
     private final PlayerDataManager pdm;
     private final TerritoryManager territoryManager;
+    private final Economy economy;
+    private final double flagCost; // Стоимость установки флага
 
-    public SubCommandCreateFlag(PlayerDataManager pdm, TerritoryManager territoryManager) {
+    public SubCommandCreateFlag(PlayerDataManager pdm, TerritoryManager territoryManager, Economy economy, double flagCost) {
         this.pdm = pdm;
         this.territoryManager = territoryManager;
+        this.economy = economy;
+        this.flagCost = flagCost;
     }
 
     @Override
@@ -31,7 +37,7 @@ public class SubCommandCreateFlag implements SubCommand {
 
     @Override
     public String getDescription() {
-        return "Установить флаг для расширения территории (только лидер)";
+        return "Установить флаг для расширения территории (только лидер). Стоимость: " + flagCost + "$";
     }
 
     @Override
@@ -59,8 +65,16 @@ public class SubCommandCreateFlag implements SubCommand {
             return true;
         }
 
+        // Проверка баланса
+        if (!economy.has(player, flagCost)) {
+            player.sendMessage(ChatColor.RED + "Недостаточно денег для установки флага. Нужно: " +
+                    ChatColor.YELLOW + flagCost + "сом" +
+                    ChatColor.RED + ", у вас: " +
+                    ChatColor.YELLOW + economy.getBalance(player) + "сом");
+            return true;
+        }
+
         Location flagLocation = player.getLocation();
-        // Более мягкая проверка блока под флагом
         Block below = flagLocation.getBlock().getRelative(BlockFace.DOWN);
         if (!below.getType().isSolid() || below.getType() == Material.WATER || below.getType() == Material.LAVA) {
             player.sendMessage(ChatColor.RED + "Флаг можно установить только на твердую поверхность (не воду/лаву).");
@@ -69,7 +83,11 @@ public class SubCommandCreateFlag implements SubCommand {
 
         boolean success = territoryManager.addFlagTerritory(clanName, flagLocation);
         if (success) {
+            // Списываем деньги
+            economy.withdrawPlayer(player, flagCost);
+
             player.sendMessage(ChatColor.GREEN + "Флаг успешно установлен! Создана новая территория 3×3 чанка.");
+            player.sendMessage(ChatColor.GREEN + "С вашего счета списано: " + ChatColor.YELLOW + flagCost + "сом.");
 
             DyeColor clanColor = territoryManager.getClanBannerColor(clanName);
 
@@ -86,7 +104,6 @@ public class SubCommandCreateFlag implements SubCommand {
                     30, 0.5, 0.5, 0.5, 0.1
             );
         } else {
-            // Более информативное сообщение об ошибке
             String clanAtLocation = territoryManager.getClanByChunk(
                     flagLocation.getBlockX() >> 4,
                     flagLocation.getBlockZ() >> 4

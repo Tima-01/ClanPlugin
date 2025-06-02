@@ -1,5 +1,6 @@
 package org.plugin.clansPlugin.commands;
 
+import net.milkbowl.vault.economy.Economy;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -29,7 +30,7 @@ public class ClanCommand implements CommandExecutor {
         TerritoryManager tm = plugin.getTerritoryManager();
         VoteManager vm = plugin.getVoteManager();
         ClanBuffManager cbm = plugin.getClanBuffManager(); // менеджер баффов
-
+        Economy economy = plugin.getEconomy();  // для экономики
         // Регистрируем все SubCommand
         register(new SubCommandInfo(pdm, tm));
         register(new SubCommandJoin(plugin));
@@ -39,15 +40,15 @@ public class ClanCommand implements CommandExecutor {
 
         // /clan setbuff
         register(new SubCommandSetBuff(pdm, plugin)); // внутри SubCommandSetBuff используется plugin.getClanBuffManager()
-
         // Базовые подкоманды по территории
+        double flagCost = plugin.getConfig().getDouble("flag-cost", 10000.0);
         register(new SubCommandCreateBase(pdm, tm));
         register(new SubCommandDeleteBase(pdm, tm));
         register(new SubCommandSetLeader(pdm));
         register(new SubCommandTpBase(pdm, tm));
 
         // Флаги
-        register(new SubCommandCreateFlag(pdm, tm));
+        register(new SubCommandCreateFlag(pdm, tm, economy, flagCost));
         register(new SubCommandRemoveFlag(pdm, tm));
         register(new SubCommandTerritories(pdm, tm));
 
