@@ -63,6 +63,14 @@ public class PlayerDataManager {
             e.printStackTrace();
         }
     }
+    public boolean hasPermission(String playerName, String permissionKey) {
+        return playerData.getBoolean("permissions." + playerName + "." + permissionKey, false);
+    }
+
+    public void setPermission(String playerName, String permissionKey, boolean value) {
+        playerData.set("permissions." + playerName + "." + permissionKey, value);
+        save();
+    }
 
     // ============================
     // Методы для работы с clanChatToggles

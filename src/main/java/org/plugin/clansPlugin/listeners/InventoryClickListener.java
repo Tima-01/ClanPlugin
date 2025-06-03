@@ -65,6 +65,7 @@ public class InventoryClickListener implements Listener {
                     plugin.getTerritoryManager().deleteClanTerritory(currentClan);
                 }
             }
+
             // Вступаем в новый клан
             pdm.setPlayerClan(player.getName(), clan);
             pdm.savePlayerData();
@@ -91,11 +92,13 @@ public class InventoryClickListener implements Listener {
                 }
             }
 
-// Сообщение самому игроку
+            // Сообщение самому игроку
             player.sendMessage(ChatColor.GREEN + "Ты вступил в клан: " + clan);
             player.closeInventory();
             return;
         }
+
+
 
         // Обработка выбора баффа
         if (title.equals(ChatColor.DARK_GREEN + "Выбор духа клана")) {

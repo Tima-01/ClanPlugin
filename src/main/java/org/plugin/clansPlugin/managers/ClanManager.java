@@ -46,4 +46,5 @@ public class ClanManager {
     public boolean clanExists(String clanName) {
         return clans != null && clans.contains(clanName);
     }
+
 }

@@ -17,6 +17,7 @@ public class ClansPlugin extends JavaPlugin {
     private VoteManager voteManager;
     private ClanExpansion clanExpansion;
     private ClanBuffManager clanBuffManager;
+    private TeleportManager teleportManager;
 
     @Override
     public void onEnable() {
@@ -26,9 +27,10 @@ public class ClansPlugin extends JavaPlugin {
         clanManager = new ClanManager(this);
         playerDataManager = new PlayerDataManager(this);
         territoryManager = new TerritoryManager(this);
+        teleportManager = new TeleportManager(getDataFolder());
         voteManager = new VoteManager(this, playerDataManager);
         long cooldownMinutes = getConfig().getLong("buff.cooldown_minutes", 30);
-        clanBuffManager = new ClanBuffManager(this,cooldownMinutes * 60 * 1000);
+        clanBuffManager = new ClanBuffManager(this, cooldownMinutes * 60 * 1000);
 
         // 2) Загрузка конфигураций
         clanManager.reloadClans();
@@ -41,14 +43,13 @@ public class ClansPlugin extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new PlayerChatListener(this), this);
         getServer().getPluginManager().registerEvents(new PlayerMoveListener(this), this);
         getServer().getPluginManager().registerEvents(new ClanDamageListener(this), this);
-        getServer().getPluginManager().registerEvents(new FlagListener(territoryManager, this),this);
+        getServer().getPluginManager().registerEvents(new FlagListener(territoryManager, this), this);
 
         // 4) Регистрируем команды
         getCommand("clanpvp").setExecutor(new ClanPvpCommand(playerDataManager));
-
         getCommand("clanadmin").setExecutor(new ClanAdminCommand(playerDataManager, territoryManager, clanManager));
         getCommand("endvote").setExecutor(new EndVoteCommand(voteManager));
-        getCommand("showbase").setExecutor(new ShowBaseCommand(territoryManager, playerDataManager)); // Можно использовать getInstance() внутри
+        getCommand("showbase").setExecutor(new ShowBaseCommand(territoryManager, playerDataManager));
         getCommand("chatcl").setExecutor(new ChatClCommand(this));
         getCommand("clanchat").setExecutor(new ClanChatCommand(this));
         getCommand("clan").setExecutor(new ClanCommand(this));
@@ -58,7 +59,6 @@ public class ClansPlugin extends JavaPlugin {
         getCommand("votel").setExecutor(new VoteCommand(voteManager));
 
         getLogger().info("ClansPlugin включен.");
-
 
         // 5) Регистрация плейсхолдеров
         if (Bukkit.getPluginManager().isPluginEnabled("PlaceholderAPI")) {
@@ -94,5 +94,12 @@ public class ClansPlugin extends JavaPlugin {
     public TerritoryManager getTerritoryManager() {
         return territoryManager;
     }
-    public ClanBuffManager getClanBuffManager() { return clanBuffManager; }
+
+    public ClanBuffManager getClanBuffManager() {
+        return clanBuffManager;
+    }
+
+    public TeleportManager getTeleportManager() {
+        return teleportManager;
+    }
 }
