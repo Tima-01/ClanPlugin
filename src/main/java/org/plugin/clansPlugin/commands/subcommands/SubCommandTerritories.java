@@ -47,7 +47,8 @@ public class SubCommandTerritories implements SubCommand {
             return true;
         }
 
-        if (!playerDataManager.hasTrust(playerName)) {
+        if (!playerDataManager.isClanLeader(playerName) &&
+                !playerDataManager.hasTrust(playerName)) {
             player.sendMessage(ChatColor.RED + "Лидер вам не доверяет.");
             return true;
         }

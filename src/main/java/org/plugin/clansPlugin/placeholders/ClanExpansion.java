@@ -114,7 +114,8 @@ public class ClanExpansion extends PlaceholderExpansion {
                 }
 
                 // Проверка доверия
-                if (!plugin.getPlayerDataManager().hasTrust(player.getName())) {
+                if (!plugin.getPlayerDataManager().isClanLeader(player.getName()) &&
+                        !plugin.getPlayerDataManager().hasTrust(player.getName())) {
                     return "§cЛидер вам не доверяет";
                 }
 
