@@ -44,8 +44,11 @@ public class ChatClCommand implements CommandExecutor {
 
         // Рассылаем сообщение только тем, у кого включён clanChatToggle
         for (Player p : Bukkit.getOnlinePlayers()) {
-            String pClan = pdm.getPlayerClan(p.getName());
-            if (clan.equals(pClan) && pdm.isClanChatToggled(p.getName())) {
+            String pName = p.getName();
+            boolean sameClan = clan.equals(pdm.getPlayerClan(pName));
+            boolean isAdmin = p.hasPermission("clan.admin");
+
+            if ((sameClan && pdm.isClanChatToggled(pName)) || isAdmin) {
                 p.sendMessage(formatted);
             }
         }
