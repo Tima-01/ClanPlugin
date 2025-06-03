@@ -57,7 +57,6 @@ public class ClansPlugin extends JavaPlugin {
         getCommand("clanadmin").setExecutor(new ClanAdminCommand(playerDataManager, territoryManager, clanManager));
         getCommand("endvote").setExecutor(new EndVoteCommand(voteManager));
         //getCommand("showbase").setExecutor(new ShowBaseCommand(territoryManager, playerDataManager)); // Можно использовать getInstance() внутри
-        getCommand("showbase").setExecutor(new ShowBaseCommand(territoryManager, playerDataManager));
         getCommand("chatcl").setExecutor(new ChatClCommand(this));
         getCommand("clanchat").setExecutor(new ClanChatCommand(this));
         getCommand("clan").setExecutor(new ClanCommand(this));
@@ -118,10 +117,6 @@ public class ClansPlugin extends JavaPlugin {
     public ClanBuffManager getClanBuffManager() { return clanBuffManager; }
     public PlayerMoveListener getPlayerMoveListener() { return playerMoveListener; }
     public Economy getEconomy() { return this.economy; }
-
-    public ClanBuffManager getClanBuffManager() {
-        return clanBuffManager;
-    }
 
     public TeleportManager getTeleportManager() {
         return teleportManager;

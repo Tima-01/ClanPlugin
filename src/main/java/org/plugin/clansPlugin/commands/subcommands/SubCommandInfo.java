@@ -58,7 +58,7 @@
                     ChatColor.YELLOW + "Лидер: " + ChatColor.LIGHT_PURPLE + "%clan_leader:" + clanName + "%\n" +
                     ChatColor.YELLOW + "Участники (" + ChatColor.AQUA + "%clan_members:" + clanName + "%" + ChatColor.YELLOW + "):\n" +
                     getMembersList(clanName) + "\n" +
-                    ChatColor.YELLOW + "База: " + getBaseInfo(clanName) + "\n" +
+                    ChatColor.YELLOW + "База: " + getBaseInfo(clanName, player) + "\n" +
                     getTerritoryInfo(clanName, territoriesConfig) + "\n" +
                     ChatColor.GOLD + "=========================";
     
@@ -83,12 +83,17 @@
             }
             return membersList.toString().trim();
         }
-    
-        private String getBaseInfo(String clanName) {
+
+        private String getBaseInfo(String clanName, Player player) {
             Location base = territoryManager.getClanBaseCenter(clanName);
             if (base != null) {
-                return ChatColor.AQUA + base.getWorld().getName() + " [" +
-                        base.getBlockX() + ", " + base.getBlockY() + ", " + base.getBlockZ() + "]";
+                // Если игрок — лидер или имеет доверие, показываем координаты
+                if (pdm.isClanLeader(player.getName()) || pdm.hasTrust(player.getName())) {
+                    return ChatColor.AQUA + base.getWorld().getName() + " [" +
+                            base.getBlockX() + ", " + base.getBlockY() + ", " + base.getBlockZ() + "]";
+                } else {
+                    return ChatColor.RED + "Лидер вам не доверяет";
+                }
             }
             return ChatColor.RED + "не установлена";
         }

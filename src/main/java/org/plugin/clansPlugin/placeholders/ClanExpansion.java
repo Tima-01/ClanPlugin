@@ -109,13 +109,13 @@ public class ClanExpansion extends PlaceholderExpansion {
                 if (clanParam == null) return "Не указан клан";
 
                 String playerClan = plugin.getPlayerDataManager().getPlayerClan(player.getName());
-
-                if (playerClan == null) {
-                    return "§7Чтобы вступить в этот клан введите /clan join";
+                if (playerClan == null || !playerClan.equalsIgnoreCase(clanParam)) {
+                    return "§cВы из другого клана!";
                 }
 
-                if (!playerClan.equalsIgnoreCase(clanParam)) {
-                    return "§cВы из другого клана!";
+                // Проверка доверия
+                if (!plugin.getPlayerDataManager().hasTrust(player.getName())) {
+                    return "§cЛидер вам не доверяет";
                 }
 
                 Location base = plugin.getTerritoryManager().getClanBaseCenter(clanParam);

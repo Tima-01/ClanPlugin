@@ -38,6 +38,7 @@ public class ClanCommand implements CommandExecutor {
         register(new SubCommandLeave(pdm, tm));
         register(new SubCommandReload(plugin));
         register(new SubCommandChatToggle(pdm));
+        register(new SubCommandTrust(pdm));
 
         // /clan setbuff
         register(new SubCommandSetBuff(pdm, plugin)); // внутри SubCommandSetBuff используется plugin.getClanBuffManager()

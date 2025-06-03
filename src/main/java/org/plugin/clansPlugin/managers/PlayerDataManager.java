@@ -204,5 +204,19 @@ public class PlayerDataManager {
         save();
     }
 
+    public boolean hasTrust(String playerName) {
+        return playerData.getBoolean("trust." + playerName, false);
+    }
+
+    public void setTrust(String playerName, boolean trusted) {
+        playerData.set("trust." + playerName, trusted);
+        save();
+    }
+
+    public boolean isClanLeader(String playerName) {
+        String clanName = getPlayerClan(playerName);
+        if (clanName == null) return false;
+        return playerName.equals(getClanLeader(clanName));
+    }
 }
 

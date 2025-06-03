@@ -50,6 +50,8 @@ public class SubCommandHelp implements SubCommand {
         player.sendMessage(ChatColor.YELLOW + "/clan createflag" + ChatColor.WHITE + " - Установить флаг для расширения территории");
         player.sendMessage(ChatColor.YELLOW + "/clan removeflag" + ChatColor.WHITE + " - Удалить флаг");
         player.sendMessage(ChatColor.YELLOW + "/removeplayer <игрок>" + ChatColor.WHITE + " - Удалить участника из клана");
+        player.sendMessage(ChatColor.YELLOW + "/clan permit <игрок>" + ChatColor.WHITE + " - Разрешение на телепорт базы");
+        player.sendMessage(ChatColor.YELLOW + "/clan trust <игрок>" + ChatColor.WHITE + " - Доступ к координатам базы");
 
 
         player.sendMessage(ChatColor.GOLD + "============================");
