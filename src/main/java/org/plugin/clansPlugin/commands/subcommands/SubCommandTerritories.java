@@ -10,11 +10,11 @@ import java.util.List;
 
 public class SubCommandTerritories implements SubCommand {
 
-    private final PlayerDataManager pdm;
+    private final PlayerDataManager playerDataManager;
     private final TerritoryManager territoryManager;
 
     public SubCommandTerritories(PlayerDataManager pdm, TerritoryManager territoryManager) {
-        this.pdm = pdm;
+        this.playerDataManager = pdm;
         this.territoryManager = territoryManager;
     }
 
@@ -41,9 +41,14 @@ public class SubCommandTerritories implements SubCommand {
         }
 
         String playerName = player.getName();
-        String clanName = pdm.getPlayerClan(playerName);
+        String clanName = playerDataManager.getPlayerClan(playerName);
         if (clanName == null) {
             player.sendMessage(ChatColor.RED + "Ты не состоишь в клане.");
+            return true;
+        }
+
+        if (!playerDataManager.hasTrust(playerName)) {
+            player.sendMessage(ChatColor.RED + "Лидер вам не доверяет.");
             return true;
         }
 

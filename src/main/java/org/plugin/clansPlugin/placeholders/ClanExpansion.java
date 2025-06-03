@@ -9,9 +9,7 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 public class ClanExpansion extends PlaceholderExpansion {
 
@@ -103,13 +101,29 @@ public class ClanExpansion extends PlaceholderExpansion {
                 if (clanParam == null) return "Не указан клан";
                 return String.valueOf(getClanTerritory(clanParam).size());
             }
+            case "name": {
+                String clanName = plugin.getPlayerDataManager().getPlayerClan(player.getName());
+                return clanName != null ? clanName : "";
+            }
             case "base": {
                 if (clanParam == null) return "Не указан клан";
+
+                String playerClan = plugin.getPlayerDataManager().getPlayerClan(player.getName());
+                if (playerClan == null || !playerClan.equalsIgnoreCase(clanParam)) {
+                    return "§cВы из другого клана!";
+                }
+
+                // Проверка доверия
+                if (!plugin.getPlayerDataManager().hasTrust(player.getName())) {
+                    return "§cЛидер вам не доверяет";
+                }
+
                 Location base = plugin.getTerritoryManager().getClanBaseCenter(clanParam);
                 return base != null
-                        ? String.format("X: %d, Y: %d, Z: %d", base.getBlockX(), base.getBlockY(), base.getBlockZ())
-                        : "Пока нет";
+                        ? String.format("§aX: %d, Y: %d, Z: %d", base.getBlockX(), base.getBlockY(), base.getBlockZ())
+                        : "§eБаза не установлена";
             }
+
             default:
                 return null;
         }
@@ -136,20 +150,52 @@ public class ClanExpansion extends PlaceholderExpansion {
     private List<String> getClanTerritory(String clanName) {
         if (territoryConfig == null) return Collections.emptyList();
 
-        List<String> chunks = new ArrayList<>();
-        List<?> rawList = territoryConfig.getList("territories." + clanName);
-        if (rawList == null) return chunks;
+        Set<String> uniqueChunks = new HashSet<>();
 
-        for (Object item : rawList) {
-            if (item instanceof List<?>) {
-                List<?> coords = (List<?>) item;
-                String coord = String.join(",", coords.stream().map(Object::toString).toArray(String[]::new));
-                chunks.add(coord);
-            } else if (item instanceof String) {
-                chunks.add((String) item);
+        // 1. Обрабатываем основную территорию
+        String baseCoords = territoryConfig.getString("territories." + clanName);
+        if (baseCoords != null) {
+            addChunksFromCoords(uniqueChunks, baseCoords);
+        }
+
+        // 2. Обрабатываем территории флагов
+        if (territoryConfig.contains("flags." + clanName)) {
+            for (String flagId : territoryConfig.getConfigurationSection("flags." + clanName).getKeys(false)) {
+                String flagData = territoryConfig.getString("flags." + clanName + "." + flagId);
+                if (flagData != null) {
+                    String[] parts = flagData.split(",");
+                    if (parts.length >= 4) {
+                        addChunksFromCoords(uniqueChunks, parts[0] + "," + parts[1] + "," + parts[2] + "," + parts[3]);
+                    }
+                }
             }
         }
 
-        return chunks;
+        return new ArrayList<>(uniqueChunks);
+    }
+
+    private void addChunksFromCoords(Set<String> chunks, String coords) {
+        String[] parts = coords.split(",");
+        if (parts.length == 4) {
+            try {
+                int x1 = Integer.parseInt(parts[0]);
+                int z1 = Integer.parseInt(parts[1]);
+                int x2 = Integer.parseInt(parts[2]);
+                int z2 = Integer.parseInt(parts[3]);
+
+                int minX = Math.min(x1, x2);
+                int maxX = Math.max(x1, x2);
+                int minZ = Math.min(z1, z2);
+                int maxZ = Math.max(z1, z2);
+
+                for (int x = minX; x <= maxX; x++) {
+                    for (int z = minZ; z <= maxZ; z++) {
+                        chunks.add(x + "," + z);
+                    }
+                }
+            } catch (NumberFormatException e) {
+                // Логирование ошибки при необходимости
+            }
+        }
     }
 }

@@ -1,6 +1,8 @@
 package org.plugin.clansPlugin;
 
+import net.milkbowl.vault.economy.Economy;
 import org.bukkit.Bukkit;
+import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.plugin.clansPlugin.commands.*;
 import org.plugin.clansPlugin.listeners.*;
@@ -19,6 +21,8 @@ public class ClansPlugin extends JavaPlugin {
     private ClanBuffManager clanBuffManager;
     private TeleportManager teleportManager;
 
+    private PlayerMoveListener playerMoveListener;
+    private Economy economy;
     @Override
     public void onEnable() {
         instance = this;
@@ -37,6 +41,9 @@ public class ClansPlugin extends JavaPlugin {
         playerDataManager.initPlayerFile();
         territoryManager.initTerritoryFile();
 
+        if (!setupEconomy()) {
+            getLogger().severe("Vault или плагин экономики не найден! Функции с деньгами отключены.");
+        }
         // 3) Регистрируем слушателей
         getServer().getPluginManager().registerEvents(new PlayerJoinListener(this), this);
         getServer().getPluginManager().registerEvents(new InventoryClickListener(this), this);
@@ -49,7 +56,7 @@ public class ClansPlugin extends JavaPlugin {
         getCommand("clanpvp").setExecutor(new ClanPvpCommand(playerDataManager));
         getCommand("clanadmin").setExecutor(new ClanAdminCommand(playerDataManager, territoryManager, clanManager));
         getCommand("endvote").setExecutor(new EndVoteCommand(voteManager));
-        getCommand("showbase").setExecutor(new ShowBaseCommand(territoryManager, playerDataManager));
+        //getCommand("showbase").setExecutor(new ShowBaseCommand(territoryManager, playerDataManager)); // Можно использовать getInstance() внутри
         getCommand("chatcl").setExecutor(new ChatClCommand(this));
         getCommand("clanchat").setExecutor(new ClanChatCommand(this));
         getCommand("clan").setExecutor(new ClanCommand(this));
@@ -67,6 +74,18 @@ public class ClansPlugin extends JavaPlugin {
         }
     }
 
+    private boolean setupEconomy() {
+        if (getServer().getPluginManager().getPlugin("Vault") == null) {
+            return false;
+        }
+        RegisteredServiceProvider<Economy> rsp = getServer().getServicesManager().getRegistration(Economy.class);
+        if (rsp == null) {
+            return false;
+        }
+        economy = rsp.getProvider();
+        return economy != null;
+    }
+
     @Override
     public void onDisable() {
         playerDataManager.savePlayerData();
@@ -74,7 +93,7 @@ public class ClansPlugin extends JavaPlugin {
         getLogger().info("ClansPlugin отключен.");
     }
 
-    // === Геттеры ===
+        // === Геттеры ===
     public static ClansPlugin getInstance() {
         return instance;
     }
@@ -95,9 +114,9 @@ public class ClansPlugin extends JavaPlugin {
         return territoryManager;
     }
 
-    public ClanBuffManager getClanBuffManager() {
-        return clanBuffManager;
-    }
+    public ClanBuffManager getClanBuffManager() { return clanBuffManager; }
+    public PlayerMoveListener getPlayerMoveListener() { return playerMoveListener; }
+    public Economy getEconomy() { return this.economy; }
 
     public TeleportManager getTeleportManager() {
         return teleportManager;
