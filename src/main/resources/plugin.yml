@@ -6,7 +6,7 @@ api-version: '1.20'
 commands:
   clan:
     description: Основная команда управления кланами
-    usage: /<command> <info|join|leave|chat|help|createbase|deletebase|setleader|removeleader|reload|tpbase>
+    usage: /<command> <info|join|leave|chat|help|createbase|deletebase|setleader|removeleader|reload|tpbase|setbasepoint|permit>
   chatcl:
     description: Отправить сообщение в клан-чат
     usage: /<command> <сообщение>
@@ -46,6 +46,7 @@ commands:
   clanpvp:
     description: Включить или отключить PVP между соклановцами
     usage: /clanpvp <on|off>
+
 
 permissions:
   clan.admin:

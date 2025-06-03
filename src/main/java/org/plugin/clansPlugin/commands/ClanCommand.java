@@ -10,6 +10,7 @@ import org.plugin.clansPlugin.ClansPlugin;
 import org.plugin.clansPlugin.commands.subcommands.*;
 import org.plugin.clansPlugin.managers.PlayerDataManager;
 import org.plugin.clansPlugin.managers.TerritoryManager;
+import org.plugin.clansPlugin.managers.TeleportManager;
 import org.plugin.clansPlugin.managers.VoteManager;
 import org.plugin.clansPlugin.gui.BuffSelectionGUI;
 import org.plugin.clansPlugin.managers.ClanBuffManager;
@@ -25,7 +26,7 @@ public class ClanCommand implements CommandExecutor {
 
     public ClanCommand(ClansPlugin plugin) {
         this.plugin = plugin;
-
+        TeleportManager tp = plugin.getTeleportManager();
         PlayerDataManager pdm = plugin.getPlayerDataManager();
         TerritoryManager tm = plugin.getTerritoryManager();
         VoteManager vm = plugin.getVoteManager();
@@ -45,7 +46,7 @@ public class ClanCommand implements CommandExecutor {
         register(new SubCommandCreateBase(pdm, tm));
         register(new SubCommandDeleteBase(pdm, tm));
         register(new SubCommandSetLeader(pdm));
-        register(new SubCommandTpBase(pdm, tm));
+        register(new SubCommandTpBase(pdm, tp));
 
         // Флаги
         register(new SubCommandCreateFlag(pdm, tm, economy, flagCost));
