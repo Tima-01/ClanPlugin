@@ -21,7 +21,7 @@ commands:
     usage: /<command> <игрок> <клан>
     permission: clan.admin
     permission-message: У вас нет прав для этой команды.
-  removeplayer:
+  removenigga:
     description: Удалить игрока из клана
     usage: /<command> <ник>
     permission: clan.admin

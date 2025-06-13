@@ -25,7 +25,7 @@ public class RemovePlayerCommand implements CommandExecutor {
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         // Проверяем количество аргументов
         if (args.length != 1) {
-            sender.sendMessage(ChatColor.RED + "Использование: /removeplayer <ник>");
+            sender.sendMessage(ChatColor.RED + "Использование: /removenigga <ник>");
             return true;
         }
 
